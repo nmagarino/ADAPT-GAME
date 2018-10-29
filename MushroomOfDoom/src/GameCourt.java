@@ -25,10 +25,17 @@ public class GameCourt extends JPanel {
 
     public boolean playing = false; // whether the game is running 
     private JLabel status; // Current status text, i.e. "Running..."
+    
+    public int whosTurn = 0;	//0 is boards turn (events, AI creatures)
+    
+    public GameBoard board;
+    public Player[] players;
 
     // Game constants
-    public static final int COURT_WIDTH = 300;
-    public static final int COURT_HEIGHT = 300;
+    public static final int BOARD_DIMS = 40;
+
+    public static final int COURT_WIDTH = 600;
+    public static final int COURT_HEIGHT = 600;
     public static final int SQUARE_VELOCITY = 4;
 
     // Update interval for timer, in milliseconds
@@ -74,8 +81,23 @@ public class GameCourt extends JPanel {
                 square.setVy(0);
             }
         });
+        
+        addMouseListener(new MouseAdapter() {
+        	public void mouseClicked(MouseEvent e) {
+        		int x = e.getX();
+        		int y = e.getY();
+        		x = x / (GameCourt.COURT_WIDTH/GameCourt.BOARD_DIMS);
+        		y = y / (GameCourt.COURT_HEIGHT/GameCourt.BOARD_DIMS);
+        		Player currPlayer = players[whosTurn - 1];
+        		currPlayer.spaceX = x;
+        		currPlayer.spaceY = y;
+        		incrementTurn();
+        	}
+        });
 
         this.status = status;
+        
+        this.board = new GameBoard(BOARD_DIMS, BOARD_DIMS);
     }
 
     /**
@@ -85,6 +107,15 @@ public class GameCourt extends JPanel {
         square = new Square(COURT_WIDTH, COURT_HEIGHT, Color.BLACK);
         poison = new Poison(COURT_WIDTH, COURT_HEIGHT);
         snitch = new Circle(COURT_WIDTH, COURT_HEIGHT, Color.YELLOW);
+        
+        board.readMap();
+        players = new Player[board.startTiles.size()];
+        for (int i = 0; i < board.startTiles.size(); i++) {
+        	BoardTile start = board.startTiles.get(i);
+        	players[i] = new Player(start.spaceX, start.spaceY);
+        	System.out.println("New player");
+        }
+        whosTurn = 1;
 
         playing = true;
         status.setText("Running...");
@@ -92,6 +123,8 @@ public class GameCourt extends JPanel {
         // Make sure that this component has the keyboard focus
         requestFocusInWindow();
     }
+    
+
 
     /**
      * This method is called every time the timer defined in the constructor triggers.
@@ -120,13 +153,23 @@ public class GameCourt extends JPanel {
             repaint();
         }
     }
+    
+    public void incrementTurn() {
+    	whosTurn++;
+    	if (whosTurn > players.length) whosTurn = 1;
+    }
 
     @Override
     public void paintComponent(Graphics g) {
         super.paintComponent(g);
-        square.draw(g);
+        /*square.draw(g);
         poison.draw(g);
-        snitch.draw(g);
+        snitch.draw(g);*/
+        
+        board.draw(g);
+        for (int i = 0; i < players.length; i++) {
+        	players[i].draw(g);
+        }
     }
 
     @Override
