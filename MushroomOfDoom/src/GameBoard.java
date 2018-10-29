@@ -27,7 +27,7 @@ public class GameBoard {
         BufferedImage img;
 
     	try {
-            img = ImageIO.read(new File("AdaptMapt.png"));
+            img = ImageIO.read(new File("resources/textures/AdaptMapt.png"));
             board = new BoardTile[img.getWidth()][img.getHeight()];
             
             for (int i = 0; i < board.length; i++) {
@@ -64,6 +64,39 @@ public class GameBoard {
             		}
                 }
             }
+            
+            for (int i = 0; i < board.length; i++) {
+            	for (int j = 0; j < board[0].length; j++) {
+            		if (j == 0) {
+            			board[i][j].up = null;
+            		}
+            		else {
+            			board[i][j].up = board[i][j - 1];
+            		}
+            		
+            		if (j == board.length - 1) {
+            			board[i][j].down = null;
+            		}
+            		else {
+            			board[i][j].down = board[i][j + 1];
+            		}
+            		
+            		if (i == 0) {
+            			board[i][j].left = null;
+            		}
+            		else {
+            			board[i][j].left = board[i - 1][j];
+            		}
+            		
+            		if (i == board[0].length - 1) {
+            			board[i][j].right = null;
+            		}
+            		else {
+            			board[i][j].right = board[i + 1][j];
+            		}
+            	}
+            }
+            
         } catch (IOException e) {
             System.out.println("Internal Error:" + e.getMessage());
         }
