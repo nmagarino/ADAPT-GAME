@@ -94,6 +94,8 @@ public class GameBoard {
             		else {
             			board[i][j].right = board[i + 1][j];
             		}
+            		
+            		board[i][j].adjacent = new BoardTile[] {board[i][j].up, board[i][j].down, board[i][j].left, board[i][j].right};
             	}
             }
             

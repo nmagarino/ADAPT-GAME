@@ -19,6 +19,13 @@ public class BoardTile extends GameObj {
 	
 	int spaceX, spaceY;
 	
+	public BoardTile up;
+	public BoardTile down;
+	public BoardTile left;
+	public BoardTile right;
+	
+	public BoardTile[] adjacent;
+	
 	public BoardTile(EnumTileType type, int posX, int posY) {
 		super(0, 0,
 				posX * (GameCourt.COURT_WIDTH/GameCourt.BOARD_DIMS),
@@ -30,6 +37,36 @@ public class BoardTile extends GameObj {
 		this.type = type;
 		spaceX = posX;
 		spaceY = posY;
+		
+		adjacent = new BoardTile[4];
+	}
+	
+	public int getWeight(Creature creature, int currDist) {
+		if (type == EnumTileType.ROCK) {
+			return 100;
+		}
+		else if (type == EnumTileType.LAND || type == EnumTileType.FOREST || type == EnumTileType.TUNDRA || type == EnumTileType.BEACH) {
+			if (creature.getLandMovement()) {
+				if (type == EnumTileType.FOREST && creature.getJungleMovement()) {
+					return 1;
+				}
+				else if (type == EnumTileType.TUNDRA && creature.getTundraMovement()) {
+					return 1;
+				}
+				else if (type == EnumTileType.BEACH || type == EnumTileType.LAND) {
+					return 1;
+				}
+				return Math.max(creature.getMovement() - currDist, 1);
+			}
+			else return 100;
+		}
+		else if (type == EnumTileType.WATER || type == EnumTileType.BEACH_FLOODED) {
+			if (creature.getWaterMovement()) {
+				return 1;
+			}
+			return Math.max(creature.getMovement() - currDist, 1);
+		}
+		return 1;
 	}
 	
 	@Override

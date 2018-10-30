@@ -6,6 +6,12 @@
 
 import java.awt.*;
 import java.awt.event.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import javax.swing.*;
 
 /**
@@ -30,6 +36,8 @@ public class GameCourt extends JPanel {
     
     public GameBoard board;
     public Player[] players;
+    
+    private Map<BoardTile, CreaturePath> validPaths;
 
     // Game constants
     public static final int BOARD_DIMS = 40;
@@ -37,6 +45,9 @@ public class GameCourt extends JPanel {
     public static final int COURT_WIDTH = 600;
     public static final int COURT_HEIGHT = 600;
     public static final int SQUARE_VELOCITY = 4;
+    
+    int frame;
+    boolean isAnimating;
 
     // Update interval for timer, in milliseconds
     public static final int INTERVAL = 35;
@@ -89,15 +100,43 @@ public class GameCourt extends JPanel {
         		x = x / (GameCourt.COURT_WIDTH/GameCourt.BOARD_DIMS);
         		y = y / (GameCourt.COURT_HEIGHT/GameCourt.BOARD_DIMS);
         		Player currPlayer = players[whosTurn - 1];
-        		currPlayer.spaceX = x;
-        		currPlayer.spaceY = y;
-        		incrementTurn();
+        		CreaturePath path = validPaths.get(board.board[x][y]);
+        		if (path != null) {
+        			animateCreatureMovement(currPlayer, path);
+	        		currPlayer.spaceX = x;
+	        		currPlayer.spaceY = y;
+	        		incrementTurn();
+        		}
         	}
         });
+        
+        addMouseMotionListener(new MouseMotionListener() {
+			@Override
+			public void mouseMoved(MouseEvent e) {
+				Collection<CreaturePath> paths = validPaths.values();
+		        for (CreaturePath path : paths) {
+		        	path.mouseOver = false;
+		        }
+				int x = e.getX();
+        		int y = e.getY();
+        		x = x / (GameCourt.COURT_WIDTH/GameCourt.BOARD_DIMS);
+        		y = y / (GameCourt.COURT_HEIGHT/GameCourt.BOARD_DIMS);
+        		CreaturePath path = validPaths.get(board.board[x][y]);
+        		if (path != null) {
+        			path.mouseOver = true;
+        		}
+			}
+
+			@Override
+			public void mouseDragged(MouseEvent e) {
+				
+			}
+		});
 
         this.status = status;
         
         this.board = new GameBoard(BOARD_DIMS, BOARD_DIMS);
+        validPaths = new HashMap<BoardTile, CreaturePath>();
     }
 
     /**
@@ -112,16 +151,19 @@ public class GameCourt extends JPanel {
         players = new Player[board.startTiles.size()];
         for (int i = 0; i < board.startTiles.size(); i++) {
         	BoardTile start = board.startTiles.get(i);
-        	players[i] = new Player(start.spaceX, start.spaceY);
+        	players[i] = new Player(start.spaceX, start.spaceY, this);
         	System.out.println("New player");
         }
-        whosTurn = 1;
 
         playing = true;
         status.setText("Running...");
+        frame = 0;
+        isAnimating = false;
 
         // Make sure that this component has the keyboard focus
         requestFocusInWindow();
+        
+        incrementTurn();
     }
     
 
@@ -131,32 +173,30 @@ public class GameCourt extends JPanel {
      */
     void tick() {
         if (playing) {
-            // advance the square and snitch in their current direction.
-            square.move();
-            snitch.move();
-
-            // make the snitch bounce off walls...
-            snitch.bounce(snitch.hitWall());
-            // ...and the mushroom
-            snitch.bounce(snitch.hitObj(poison));
-
-            // check for the game end conditions
-            if (square.intersects(poison)) {
-                playing = false;
-                status.setText("You lose!");
-            } else if (square.intersects(snitch)) {
-                playing = false;
-                status.setText("You win!");
+            for (int i = 0; i < players.length; i++) {
+            	players[i].update();
             }
+            
+            frame++;
 
             // update the display
             repaint();
         }
     }
     
+    public void animateCreatureMovement(Creature creature, CreaturePath path) {
+    	creature.animateAlongPath(path);
+    	isAnimating = true;
+    }
+    
+    public void stopAnimating() {
+    	isAnimating = false;
+    }
+    
     public void incrementTurn() {
     	whosTurn++;
     	if (whosTurn > players.length) whosTurn = 1;
+    	validPaths = players[whosTurn - 1].getPotentialPaths();
     }
 
     @Override
@@ -167,6 +207,13 @@ public class GameCourt extends JPanel {
         snitch.draw(g);*/
         
         board.draw(g);
+        if (validPaths != null) {
+	        Collection<CreaturePath> paths = validPaths.values();
+	        for (CreaturePath path : paths) {
+	        	path.draw(g, frame);
+	        }
+        }
+        
         for (int i = 0; i < players.length; i++) {
         	players[i].draw(g);
         }
