@@ -6,10 +6,8 @@
 
 import java.awt.*;
 import java.awt.event.*;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import javax.swing.*;
@@ -25,10 +23,6 @@ import javax.swing.*;
 public class GameCourt extends JPanel {
 
     // the state of the game logic
-    private Square square; // the Black Square, keyboard control
-    private Circle snitch; // the Golden Snitch, bounces
-    private Poison poison; // the Poison Mushroom, doesn't move
-
     public boolean playing = false; // whether the game is running 
     private JLabel status; // Current status text, i.e. "Running..."
     
@@ -38,13 +32,16 @@ public class GameCourt extends JPanel {
     public Player[] players;
     
     private Map<BoardTile, CreaturePath> validPaths;
+    
+    public TraitDeck traitDeck;
+    public TraitDisplay[] traitDisplays;
+    public Creature displayingCreature;
 
     // Game constants
     public static final int BOARD_DIMS = 40;
 
     public static final int COURT_WIDTH = 600;
     public static final int COURT_HEIGHT = 600;
-    public static final int SQUARE_VELOCITY = 4;
     
     int frame;
     boolean isAnimating;
@@ -76,20 +73,11 @@ public class GameCourt extends JPanel {
         // square.)
         addKeyListener(new KeyAdapter() {
             public void keyPressed(KeyEvent e) {
-                if (e.getKeyCode() == KeyEvent.VK_LEFT) {
-                    square.setVx(-SQUARE_VELOCITY);
-                } else if (e.getKeyCode() == KeyEvent.VK_RIGHT) {
-                    square.setVx(SQUARE_VELOCITY);
-                } else if (e.getKeyCode() == KeyEvent.VK_DOWN) {
-                    square.setVy(SQUARE_VELOCITY);
-                } else if (e.getKeyCode() == KeyEvent.VK_UP) {
-                    square.setVy(-SQUARE_VELOCITY);
-                }
+            	
             }
 
             public void keyReleased(KeyEvent e) {
-                square.setVx(0);
-                square.setVy(0);
+                
             }
         });
         
@@ -103,8 +91,7 @@ public class GameCourt extends JPanel {
         		CreaturePath path = validPaths.get(board.board[x][y]);
         		if (path != null) {
         			animateCreatureMovement(currPlayer, path);
-	        		currPlayer.spaceX = x;
-	        		currPlayer.spaceY = y;
+	        		currPlayer.moveCreatureToTile(x, y);
 	        		incrementTurn();
         		}
         	}
@@ -113,15 +100,26 @@ public class GameCourt extends JPanel {
         addMouseMotionListener(new MouseMotionListener() {
 			@Override
 			public void mouseMoved(MouseEvent e) {
+				int x = e.getX();
+        		int y = e.getY();
+        		int spaceX = x / (GameCourt.COURT_WIDTH/GameCourt.BOARD_DIMS);
+        		int spaceY = y / (GameCourt.COURT_HEIGHT/GameCourt.BOARD_DIMS);
+        		
+        		Creature c = mouseOverCreature(x, y);
+        		if (c != null) {
+        			displayCreatureTraits(c);
+        		}
+        		else {
+        			stopDisplayCreatureTraits();
+        		}
+				
 				Collection<CreaturePath> paths = validPaths.values();
 		        for (CreaturePath path : paths) {
 		        	path.mouseOver = false;
 		        }
-				int x = e.getX();
-        		int y = e.getY();
-        		x = x / (GameCourt.COURT_WIDTH/GameCourt.BOARD_DIMS);
-        		y = y / (GameCourt.COURT_HEIGHT/GameCourt.BOARD_DIMS);
-        		CreaturePath path = validPaths.get(board.board[x][y]);
+		        
+		        if (spaceX >= BOARD_DIMS || spaceY >= BOARD_DIMS) return;
+        		CreaturePath path = validPaths.get(board.board[spaceX][spaceY]);
         		if (path != null) {
         			path.mouseOver = true;
         		}
@@ -136,6 +134,8 @@ public class GameCourt extends JPanel {
         this.status = status;
         
         this.board = new GameBoard(BOARD_DIMS, BOARD_DIMS);
+        traitDeck = new TraitDeck();
+        
         validPaths = new HashMap<BoardTile, CreaturePath>();
     }
 
@@ -143,9 +143,6 @@ public class GameCourt extends JPanel {
      * (Re-)set the game to its initial state.
      */
     public void reset() {
-        square = new Square(COURT_WIDTH, COURT_HEIGHT, Color.BLACK);
-        poison = new Poison(COURT_WIDTH, COURT_HEIGHT);
-        snitch = new Circle(COURT_WIDTH, COURT_HEIGHT, Color.YELLOW);
         
         board.readMap();
         players = new Player[board.startTiles.size()];
@@ -154,11 +151,14 @@ public class GameCourt extends JPanel {
         	players[i] = new Player(start.spaceX, start.spaceY, this);
         	System.out.println("New player");
         }
+        
+        traitDisplays = new TraitDisplay[3];
 
         playing = true;
         status.setText("Running...");
         frame = 0;
         isAnimating = false;
+        whosTurn = 0;
 
         // Make sure that this component has the keyboard focus
         requestFocusInWindow();
@@ -177,6 +177,10 @@ public class GameCourt extends JPanel {
             	players[i].update();
             }
             
+            for (int i = 0; i < traitDisplays.length; i++) {
+            	if (traitDisplays[i] != null) traitDisplays[i].update();
+            }
+            
             frame++;
 
             // update the display
@@ -189,6 +193,32 @@ public class GameCourt extends JPanel {
     	isAnimating = true;
     }
     
+    public void displayCreatureTraits(Creature c) {
+    	if (displayingCreature == c) return;
+    	displayingCreature = c;
+    	for (int i = 0; i < c.traits.length; i++) {
+    		traitDisplays[i] = new TraitDisplay(c.traits[i], this);
+    		traitDisplays[i].setPx((int) (c.getPx() + c.getWidth()/2.0));
+    		traitDisplays[i].setPy((int) (c.getPy() + c.getHeight()/2.0));
+    		traitDisplays[i].scale = 0f;
+    		traitDisplays[i].Xdes = COURT_WIDTH/c.traits.length * i + (COURT_WIDTH - (TraitDisplay.defaultWidth * c.traits.length))/(2 * c.traits.length);
+    		traitDisplays[i].Ydes = 20;
+    		traitDisplays[i].scaleDes = 1f;
+    	}
+    }
+    
+    public void stopDisplayCreatureTraits() {
+    	if (traitDisplays[0] == null) return;
+    	if (displayingCreature == null) return;
+    	for (int i = 0; i < displayingCreature.traits.length; i++) {
+    		traitDisplays[i].Xdes = (int) (displayingCreature.getPx() + displayingCreature.getWidth()/2.0);
+    		traitDisplays[i].Ydes = (int) (displayingCreature.getPy() + displayingCreature.getHeight()/2.0);
+    		traitDisplays[i].scaleDes = 0f;
+    	}
+    	
+    	displayingCreature = null;
+    }
+    
     public void stopAnimating() {
     	isAnimating = false;
     }
@@ -198,13 +228,21 @@ public class GameCourt extends JPanel {
     	if (whosTurn > players.length) whosTurn = 1;
     	validPaths = players[whosTurn - 1].getPotentialPaths();
     }
+    
+    public Creature mouseOverCreature(int x, int y) {
+    	for (Creature p : players) {
+    		if (x > p.getPx() && x < p.getPx() + p.getWidth()) {
+        		if (y > p.getPy() && y < p.getPy() + p.getHeight()) {
+        			return p;
+        		}
+    		}
+    	}
+    	return null;
+    }
 
     @Override
     public void paintComponent(Graphics g) {
         super.paintComponent(g);
-        /*square.draw(g);
-        poison.draw(g);
-        snitch.draw(g);*/
         
         board.draw(g);
         if (validPaths != null) {
@@ -216,6 +254,10 @@ public class GameCourt extends JPanel {
         
         for (int i = 0; i < players.length; i++) {
         	players[i].draw(g);
+        }
+        
+        for (int i = 0; i < traitDisplays.length; i++) {
+        	if (traitDisplays[i] != null) traitDisplays[i].draw(g);
         }
     }
 

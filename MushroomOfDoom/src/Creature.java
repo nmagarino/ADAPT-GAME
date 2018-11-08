@@ -20,17 +20,19 @@ public abstract class Creature extends GameObj{
 	private boolean animating;
 	
 	public Creature(int px, int py, GameCourt court) {
-		super(0, 0, px * (GameCourt.COURT_WIDTH/GameCourt.BOARD_DIMS), py * (GameCourt.COURT_HEIGHT/GameCourt.BOARD_DIMS), 1, 1, GameCourt.COURT_WIDTH, GameCourt.COURT_HEIGHT);
-		spaceX = px;
-		spaceY = py;
+		super(0, 0, px * (GameCourt.COURT_WIDTH/GameCourt.BOARD_DIMS), py * (GameCourt.COURT_HEIGHT/GameCourt.BOARD_DIMS), 15, 15, GameCourt.COURT_WIDTH, GameCourt.COURT_HEIGHT);
+		animX = spaceX = px;
+		animY = spaceY = py;
 		this.court = court;
 		traits = new Trait[3];
-		hasLegs = true;
+		hasLegs = false;
 		hasFlagellum = true;
+		traits[0] = court.traitDeck.traitArray[1];
+		traits[1] = court.traitDeck.traitArray[2];
 	}
 	
 	public int getMovement() {
-		return 3;
+		return 5;
 	}
 	
 	public int getCombat() {
@@ -69,6 +71,8 @@ public abstract class Creature extends GameObj{
 				pathTick++;
 			}
 		}
+		setPx((int)(animX * ((float)GameCourt.COURT_WIDTH/(float)GameCourt.BOARD_DIMS)));
+		setPy((int)(animY * ((float)GameCourt.COURT_HEIGHT/(float)GameCourt.BOARD_DIMS)));
 	}
 
 	private Pos minDistance(CreaturePath[][] d, boolean[][] sptSet) { 
@@ -87,7 +91,14 @@ public abstract class Creature extends GameObj{
 		}
 
 		return new Pos(min_indexX, min_indexY); 
-	} 
+	}
+	
+	public void moveCreatureToTile(int x, int y) {
+		court.board.board[spaceX][spaceY].creatureOnTile = null;
+		spaceX = x;
+		spaceY = y;
+		court.board.board[spaceX][spaceY].creatureOnTile = this;
+	}
 	
 	public Map<BoardTile, CreaturePath> getPotentialPaths() {
 		int move = getMovement();
@@ -169,19 +180,10 @@ public abstract class Creature extends GameObj{
 
 	public void draw(Graphics g) {
 		g.setColor(Color.BLACK);
-		if (animating) {
 			g.fillOval(
-					(int)(animX * ((float)GameCourt.COURT_WIDTH/(float)GameCourt.BOARD_DIMS)),
-					(int)(animY * ((float)GameCourt.COURT_HEIGHT/(float)GameCourt.BOARD_DIMS)),
-					15, 15
+					getPx(),
+					getPy(),
+					getWidth(), getHeight()
 					);
-		}
-		else {
-			g.fillOval(
-					spaceX * (GameCourt.COURT_WIDTH/GameCourt.BOARD_DIMS),
-					spaceY * (GameCourt.COURT_HEIGHT/GameCourt.BOARD_DIMS),
-					15, 15
-					);
-		}
 	}
 }

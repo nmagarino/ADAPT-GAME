@@ -85,12 +85,10 @@ public abstract class GameObj {
     /*** SETTERS **********************************************************************************/
     public void setPx(int px) {
         this.px = px;
-        clip();
     }
 
     public void setPy(int py) {
         this.py = py;
-        clip();
     }
 
     public void setVx(int vx) {
@@ -99,6 +97,14 @@ public abstract class GameObj {
 
     public void setVy(int vy) {
         this.vy = vy;
+    }
+    
+    public void setWidth(int w) {
+        this.width = w;
+    }
+
+    public void setHeight(int h) {
+        this.height = h;
     }
 
     /*** UPDATES AND OTHER METHODS ****************************************************************/

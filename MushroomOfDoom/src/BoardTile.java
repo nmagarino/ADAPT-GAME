@@ -26,6 +26,8 @@ public class BoardTile extends GameObj {
 	
 	public BoardTile[] adjacent;
 	
+	public Creature creatureOnTile;
+	
 	public BoardTile(EnumTileType type, int posX, int posY) {
 		super(0, 0,
 				posX * (GameCourt.COURT_WIDTH/GameCourt.BOARD_DIMS),
@@ -39,6 +41,8 @@ public class BoardTile extends GameObj {
 		spaceY = posY;
 		
 		adjacent = new BoardTile[4];
+		
+		creatureOnTile = null;
 	}
 	
 	public int getWeight(Creature creature, int currDist) {
