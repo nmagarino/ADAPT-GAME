@@ -27,6 +27,9 @@ public abstract class Creature extends GameObj{
 		traits = new Trait[3];
 		hasLegs = false;
 		hasFlagellum = true;
+//		traits[0] = court.traitDeck.traitArray[1];
+//		traits[1] = court.traitDeck.traitArray[2];
+//		traits[2] = court.traitDeck.traitArray[3];
 	}
 	
 	public int getMovement() {

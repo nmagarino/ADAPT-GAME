@@ -108,7 +108,6 @@ public class GameCourt extends JPanel {
         				if (x > disp.getPx() && x < disp.getPx() + disp.getWidth()) {
         					 if (y > disp.getPy() && y < disp.getPy() + disp.getHeight()) {
         						 traitToReplace = i;
-        						 disp.scaleDes = 0;
         						 evolveAnimTick++;
         					 }
         				}
@@ -211,6 +210,11 @@ public class GameCourt extends JPanel {
             	if (evolveAnimTick == 30) {
                 	traitToAddDisplay.Xdes = traitDisplays[traitToReplace].getPx();
                 	traitToAddDisplay.Ydes = traitDisplays[traitToReplace].getPy();
+                	if (userPickReplaceTrait) {
+	                	traitDisplays[traitToReplace].scaleDes = 0;
+	                	traitDisplays[traitToReplace].Xdes += traitDisplays[traitToReplace].getWidth()/2;
+	                	traitDisplays[traitToReplace].Ydes += traitDisplays[traitToReplace].getHeight()/2;
+                	}
             	}
             	if (evolveAnimTick == 50) {
             		this.displayingCreature.traits[traitToReplace] = traitToAddDisplay.trait;
