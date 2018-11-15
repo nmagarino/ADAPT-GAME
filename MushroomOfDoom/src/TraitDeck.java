@@ -89,23 +89,21 @@ public class TraitDeck {
 	}
 	
 	public Trait getRandomTrait() {
-//		float sumProbabilities = 0.f;
-//		for(int i = 0; i < traitArray.length; i++) {
-//			sumProbabilities += traitArray[i].probability;
-//		}
-//		
-//		double rand = Math.random() * sumProbabilities;
-//		
-//		sumProbabilities = 0.f;
-//		int chosenIdx = 0;
-//		for(int i = 0; rand < sumProbabilities; i++) {
-//			sumProbabilities += traitArray[i].probability;
-//			if(rand < sumProbabilities) {
-//				chosenIdx = i;
-//			}
-//		}
-//		
-//		return traitArray[chosenIdx];	
-		return traitArray[0];
+		float sumProbabilities = 0.f;
+		for(int i = 0; i < traitArray.length; i++) {
+			sumProbabilities += traitArray[i].probability;
+		}
+		
+		double rand = Math.random() * sumProbabilities;
+		
+		sumProbabilities = 0.f;
+		for(int i = 0; i < traitArray.length; i++) {
+			sumProbabilities += traitArray[i].probability;
+			if(rand < sumProbabilities) {
+				return traitArray[i];
+			}
+		}
+		
+		return traitArray[0];	
 	}
 }

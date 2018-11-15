@@ -9,6 +9,7 @@ public class BoardTile extends GameObj {
 		TUNDRA,
 		ROCK,
 		NEST,
+		NEST_INACTIVE,
 		GOAL,
 		START,
 		BEACH,
@@ -23,6 +24,8 @@ public class BoardTile extends GameObj {
 	public BoardTile down;
 	public BoardTile left;
 	public BoardTile right;
+	
+	public int turnsUntilNestActive;
 	
 	public BoardTile[] adjacent;
 	
@@ -93,6 +96,9 @@ public class BoardTile extends GameObj {
 		else if (type == EnumTileType.NEST) {
 			g.setColor(new Color(187, 46, 47));
 		}
+		else if (type == EnumTileType.NEST_INACTIVE) {
+			g.setColor(new Color(140, 26, 23));
+		}
 		else if (type == EnumTileType.GOAL) {
 			g.setColor(new Color(255, 246, 99));
 		}
@@ -101,6 +107,9 @@ public class BoardTile extends GameObj {
 		}
 		else if (type == EnumTileType.BEACH) {
 			g.setColor(new Color(201, 200, 152));
+		}
+		else if (type == EnumTileType.BEACH_FLOODED) {
+			g.setColor(new Color(45, 110, 190));
 		}
 		else {
 			g.setColor(new Color(45, 110, 190));

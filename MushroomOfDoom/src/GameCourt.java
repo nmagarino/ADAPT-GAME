@@ -35,7 +35,11 @@ public class GameCourt extends JPanel {
     
     public TraitDeck traitDeck;
     public TraitDisplay[] traitDisplays;
+    public TraitDisplay traitToAddDisplay;
     public Creature displayingCreature;
+    public boolean displayingEvolving;
+    public int traitToReplace;
+    public boolean userPickReplaceTrait;
 
     // Game constants
     public static final int BOARD_DIMS = 40;
@@ -45,6 +49,7 @@ public class GameCourt extends JPanel {
     
     int frame;
     boolean isAnimating;
+    int evolveAnimTick;
 
     // Update interval for timer, in milliseconds
     public static final int INTERVAL = 35;
@@ -85,14 +90,29 @@ public class GameCourt extends JPanel {
         	public void mouseClicked(MouseEvent e) {
         		int x = e.getX();
         		int y = e.getY();
-        		x = x / (GameCourt.COURT_WIDTH/GameCourt.BOARD_DIMS);
-        		y = y / (GameCourt.COURT_HEIGHT/GameCourt.BOARD_DIMS);
-        		Player currPlayer = players[whosTurn - 1];
-        		CreaturePath path = validPaths.get(board.board[x][y]);
-        		if (path != null) {
-        			animateCreatureMovement(currPlayer, path);
-	        		currPlayer.moveCreatureToTile(x, y);
-	        		incrementTurn();
+        		int spaceX = x / (GameCourt.COURT_WIDTH/GameCourt.BOARD_DIMS);
+        		int spaceY = y / (GameCourt.COURT_HEIGHT/GameCourt.BOARD_DIMS);
+        		
+        		if (!displayingEvolving) {
+	        		Player currPlayer = players[whosTurn - 1];
+	        		CreaturePath path = validPaths.get(board.board[spaceX][spaceY]);
+	        		if (path != null) {
+	        			animateCreatureMovement(currPlayer, path);
+		        		currPlayer.moveCreatureToTile(spaceX, spaceY);
+		        		incrementTurn();
+	        		}
+        		}
+        		else if (userPickReplaceTrait && evolveAnimTick == 28) {
+        			for (int i = 0; i < traitDisplays.length; i++) {
+        				TraitDisplay disp = traitDisplays[i];
+        				if (x > disp.getPx() && x < disp.getPx() + disp.getWidth()) {
+        					 if (y > disp.getPy() && y < disp.getPy() + disp.getHeight()) {
+        						 traitToReplace = i;
+        						 disp.scaleDes = 0;
+        						 evolveAnimTick++;
+        					 }
+        				}
+        			}
         		}
         	}
         });
@@ -106,10 +126,10 @@ public class GameCourt extends JPanel {
         		int spaceY = y / (GameCourt.COURT_HEIGHT/GameCourt.BOARD_DIMS);
         		
         		Creature c = mouseOverCreature(x, y);
-        		if (c != null) {
+        		if (c != null && !displayingEvolving) {
         			displayCreatureTraits(c);
         		}
-        		else {
+        		else if (!displayingEvolving) {
         			stopDisplayCreatureTraits();
         		}
 				
@@ -157,6 +177,7 @@ public class GameCourt extends JPanel {
         playing = true;
         status.setText("Running...");
         frame = 0;
+        evolveAnimTick = 0;
         isAnimating = false;
         whosTurn = 0;
 
@@ -179,6 +200,24 @@ public class GameCourt extends JPanel {
             
             for (int i = 0; i < traitDisplays.length; i++) {
             	if (traitDisplays[i] != null) traitDisplays[i].update();
+            }
+            if (traitToAddDisplay != null) traitToAddDisplay.update();
+            
+            if (displayingEvolving) {
+            	if (!(this.userPickReplaceTrait && evolveAnimTick == 28)) evolveAnimTick++;
+            	if (evolveAnimTick == 10) {
+                	traitToAddDisplay.Ydes = 300;
+            	}
+            	if (evolveAnimTick == 30) {
+                	traitToAddDisplay.Xdes = traitDisplays[traitToReplace].getPx();
+                	traitToAddDisplay.Ydes = traitDisplays[traitToReplace].getPy();
+            	}
+            	if (evolveAnimTick == 50) {
+            		this.displayingCreature.traits[traitToReplace] = traitToAddDisplay.trait;
+            		stopDisplayCreatureTraits();
+            		evolveAnimTick = 0;
+            		this.displayingEvolving = false;
+            	}
             }
             
             frame++;
@@ -215,8 +254,28 @@ public class GameCourt extends JPanel {
     		traitDisplays[i].Ydes = (int) (displayingCreature.getPy() + displayingCreature.getHeight()/2.0);
     		traitDisplays[i].scaleDes = 0f;
     	}
+    	if (traitToAddDisplay != null) {
+    		traitToAddDisplay.Xdes = (int) (displayingCreature.getPx() + displayingCreature.getWidth()/2.0);
+    		traitToAddDisplay.Ydes = (int) (displayingCreature.getPy() + displayingCreature.getHeight()/2.0);
+    		traitToAddDisplay.scaleDes = 0f;
+    	}
     	
     	displayingCreature = null;
+    }
+    
+    public void displayEvolving(Creature c, Trait t, int whichTrait, boolean userPick) {
+    	displayingEvolving = true;
+    	evolveAnimTick = 0;
+    	this.traitToReplace = whichTrait;
+    	this.userPickReplaceTrait = userPick;
+    	displayCreatureTraits(c);
+    	traitToAddDisplay = new TraitDisplay(t, this);
+    	traitToAddDisplay.setPx(COURT_WIDTH/2 - traitToAddDisplay.getWidth()/2);
+    	traitToAddDisplay.setPy(600);
+    	traitToAddDisplay.scale = 1f;
+    	traitToAddDisplay.Xdes = COURT_WIDTH/2 - traitToAddDisplay.getWidth()/2;
+    	traitToAddDisplay.Ydes = 600;
+    	traitToAddDisplay.scaleDes = 1f;
     }
     
     public void stopAnimating() {
@@ -245,7 +304,7 @@ public class GameCourt extends JPanel {
         super.paintComponent(g);
         
         board.draw(g);
-        if (validPaths != null) {
+        if (validPaths != null && !displayingEvolving) {
 	        Collection<CreaturePath> paths = validPaths.values();
 	        for (CreaturePath path : paths) {
 	        	path.draw(g, frame);
@@ -259,6 +318,7 @@ public class GameCourt extends JPanel {
         for (int i = 0; i < traitDisplays.length; i++) {
         	if (traitDisplays[i] != null) traitDisplays[i].draw(g);
         }
+        if (traitToAddDisplay != null) traitToAddDisplay.draw(g);
     }
 
     @Override

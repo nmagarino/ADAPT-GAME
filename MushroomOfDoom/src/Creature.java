@@ -11,7 +11,7 @@ public abstract class Creature extends GameObj{
 	public Trait[] traits;
 	public boolean hasLegs;
 	public boolean hasFlagellum;
-	private GameCourt court;
+	protected GameCourt court;
 	
 	private CreaturePath currentPath;
 	private int pathTick;
@@ -27,8 +27,6 @@ public abstract class Creature extends GameObj{
 		traits = new Trait[3];
 		hasLegs = false;
 		hasFlagellum = true;
-		traits[0] = court.traitDeck.traitArray[1];
-		traits[1] = court.traitDeck.traitArray[2];
 	}
 	
 	public int getMovement() {
@@ -49,7 +47,7 @@ public abstract class Creature extends GameObj{
 	}
 	
 	public void update() {
-		int speed = 5;
+		int speed = 3;
 		if (currentPath != null) {
 			
 			if (pathTick == speed) {
@@ -61,6 +59,8 @@ public abstract class Creature extends GameObj{
 				currentPath = null;
 				animating = false;
 				court.stopAnimating();
+				animX = spaceX;
+				animY = spaceY;
 			}
 			else {
 				BoardTile t1 = currentPath.getTiles().get(currTile);
@@ -146,7 +146,7 @@ public abstract class Creature extends GameObj{
 		Map<BoardTile, CreaturePath> validPaths = new HashMap<BoardTile, CreaturePath>();
 		for (int i = 0; i < d.length; i++) {
 			for (int j = 0; j < d[0].length; j++) {
-				if (d[i][j].getLength() <= move && !d[i][j].getTiles().isEmpty()) validPaths.put(d[i][j].getEnd(), d[i][j]);
+				if (d[i][j].getLength() <= move && !d[i][j].getTiles().isEmpty() && (d[i][j].getEnd().creatureOnTile == null || d[i][j].getEnd().creatureOnTile == this)) validPaths.put(d[i][j].getEnd(), d[i][j]);
 			}
 		}
 		

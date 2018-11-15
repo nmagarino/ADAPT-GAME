@@ -13,7 +13,7 @@ public class TraitDisplay extends GameObj {
 	public float scaleDes = 1;
 	
 	public static int defaultWidth = 180;
-	public static int defaultHeight = 300;
+	public static int defaultHeight = 250;
 
 	public TraitDisplay(Trait trait, GameCourt court) {
 		super(0, 0, 70, 50, defaultWidth, defaultHeight, GameCourt.COURT_WIDTH, GameCourt.COURT_HEIGHT);
@@ -32,8 +32,8 @@ public class TraitDisplay extends GameObj {
 	
 	public void draw(Graphics g) {
 		if (trait == null || trait.name == "None") {
-			g.setColor(new Color(102, 51, 0));
-			g.drawRect(this.getPx(), this.getPy(), getWidth(), getHeight());
+			g.setColor(new Color(102, 51, 0, 100));
+			g.fillRect(this.getPx(), this.getPy(), getWidth(), getHeight());
 		}
 		else {
 			g.setColor(new Color(102, 51, 0));
