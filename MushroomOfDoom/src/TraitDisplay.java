@@ -13,7 +13,7 @@ public class TraitDisplay extends GameObj {
 	public float scaleDes = 1;
 	
 	public static int defaultWidth = 180;
-	public static int defaultHeight = 250;
+	public static int defaultHeight = 270;
 
 	public TraitDisplay(Trait trait, GameCourt court) {
 		super(0, 0, 70, 50, defaultWidth, defaultHeight, GameCourt.COURT_WIDTH, GameCourt.COURT_HEIGHT);
@@ -41,15 +41,15 @@ public class TraitDisplay extends GameObj {
 			g.setColor(new Color(204, 102, 0));
 			g.fillRect(this.getPx(), this.getPy(), getWidth(), getHeight());
 			
-			if (trait.img != null) g.drawImage(trait.img, this.getPx(), this.getPy(), this.getWidth(), (int)(this.getHeight() * 0.6), null);
+			if (trait.img != null) g.drawImage(trait.img, this.getPx(), this.getPy(), this.getWidth(), this.getWidth(), null);
 
 			Rectangle dispRect = new Rectangle(this.getPx(), this.getPy(), getWidth(), getHeight());
 			
 			g.setColor(Color.WHITE);
-			dispRect.translate(0, (int) (getHeight() * 0.72));
+			dispRect.translate(0, (int) (getHeight() * 0.78));
 			drawCenteredString(g, trait.name, dispRect, new Font("Helvetica", Font.PLAIN, (int)(30 * scale)));
 			
-			dispRect.translate(0, (int) (getHeight() * 0.08));
+			dispRect.translate(0, (int) (getHeight() * 0.09));
 			drawCenteredString(g, trait.description, dispRect, new Font("Helvetica", Font.PLAIN, (int)(20 * scale)));
 		}
 

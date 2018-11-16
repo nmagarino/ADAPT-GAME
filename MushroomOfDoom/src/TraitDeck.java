@@ -66,7 +66,7 @@ public class TraitDeck {
 						false, false, false, false, 
 						.4f),
 				new Trait(
-						"Tail", "You can move normally through Rainforest.", "Trait-PrehensileTail.JPG", 
+						"Prehensile Tail", "You can move normally through Rainforest.", "Trait-PrehensileTail.JPG", 
 						0, 0, 
 						false, true, false, false, 
 						.3f),
