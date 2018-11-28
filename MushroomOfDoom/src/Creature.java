@@ -33,11 +33,25 @@ public abstract class Creature extends GameObj{
 	}
 	
 	public int getMovement() {
-		return 5;
+		// default movement is 5, bonus adds on to this
+		int sum = 5;
+		for (int i = 0; i < traits.length; i++) {
+			if (traits[i] != null) {
+				sum += traits[i].movementBonus;
+			}
+		}
+		return sum;
 	}
 	
 	public int getCombat() {
-		return 2;
+		// default combat is 2, bonus adds on to this
+		int sum = 2;
+		for (int i = 0; i < traits.length; i++) {
+			if (traits[i] != null) {
+				sum += traits[i].attackBonus;
+			}
+		}
+		return sum;
 	}
 	
 	public void animateAlongPath(CreaturePath path) {
