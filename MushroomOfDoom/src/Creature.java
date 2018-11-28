@@ -61,7 +61,7 @@ public abstract class Creature extends GameObj{
 			if (currTile == currentPath.getLength()) {
 				currentPath = null;
 				animating = false;
-				court.stopAnimating();
+				this.stopAnimating();
 				animX = spaceX;
 				animY = spaceY;
 			}
@@ -76,6 +76,10 @@ public abstract class Creature extends GameObj{
 		}
 		setPx((int)(animX * ((float)GameCourt.COURT_WIDTH/(float)GameCourt.BOARD_DIMS)));
 		setPy((int)(animY * ((float)GameCourt.COURT_HEIGHT/(float)GameCourt.BOARD_DIMS)));
+	}
+	
+	protected void stopAnimating() {
+		court.stopAnimating();
 	}
 
 	private Pos minDistance(CreaturePath[][] d, boolean[][] sptSet) { 

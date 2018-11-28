@@ -107,7 +107,7 @@ public class GameCourt extends JPanel {
         		int spaceX = x / (GameCourt.COURT_WIDTH/GameCourt.BOARD_DIMS);
         		int spaceY = y / (GameCourt.COURT_HEIGHT/GameCourt.BOARD_DIMS);
         		
-        		if (!displayingEvolving) {
+        		if (!displayingEvolving && !isAnimating) {
 	        		Player currPlayer = players[whosTurn - 1];
 	        		CreaturePath path = validPaths.get(board.board[spaceX][spaceY]);
 	        		if (path != null) {
@@ -342,7 +342,7 @@ public class GameCourt extends JPanel {
             g.drawImage(img, 0, 0, 600, 600, null);
         } else {
             board.draw(g);
-            if (validPaths != null && !displayingEvolving) {
+            if (validPaths != null && !displayingEvolving && !isAnimating) {
                 Collection<CreaturePath> paths = validPaths.values();
                 for (CreaturePath path : paths) {
                     path.draw(g, frame);

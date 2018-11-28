@@ -48,6 +48,13 @@ public class BoardTile extends GameObj {
 		creatureOnTile = null;
 	}
 	
+	public void useNest() {
+		if (this.type == EnumTileType.NEST) {
+			this.turnsUntilNestActive = 3;
+			this.type = EnumTileType.NEST_INACTIVE;
+		}
+	}
+	
 	public int getWeight(Creature creature, int currDist) {
 		if (type == EnumTileType.ROCK) {
 			return 100;
