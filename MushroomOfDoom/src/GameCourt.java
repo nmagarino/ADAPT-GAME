@@ -6,10 +6,13 @@
 
 import java.awt.*;
 import java.awt.event.*;
+import java.io.File;
+import java.io.IOException;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.imageio.ImageIO;
 import javax.swing.*;
 
 /**
@@ -25,6 +28,8 @@ public class GameCourt extends JPanel {
     // the state of the game logic
     public boolean playing = false; // whether the game is running 
     private JLabel status; // Current status text, i.e. "Running..."
+    public boolean start = false; // whether the game has just started
+    public boolean instructions = false; // whether we are showing the instructions
     
     public int whosTurn = 0;	//0 is boards turn (events, AI creatures)
     
@@ -78,7 +83,16 @@ public class GameCourt extends JPanel {
         // square.)
         addKeyListener(new KeyAdapter() {
             public void keyPressed(KeyEvent e) {
-            	
+            	if (start) {
+            	    if (e.getKeyCode() == KeyEvent.VK_ENTER) {
+                        start = false;
+                        instructions = true;
+                    }
+            	} else if (!start && instructions) {
+            	    if (e.getKeyCode() == KeyEvent.VK_ENTER) {
+                        instructions = false;
+                    }
+            	}
             }
 
             public void keyReleased(KeyEvent e) {
@@ -174,12 +188,13 @@ public class GameCourt extends JPanel {
         traitDisplays = new TraitDisplay[3];
 
         playing = true;
+        start = true;
         status.setText("Running...");
         frame = 0;
         evolveAnimTick = 0;
         isAnimating = false;
         whosTurn = 0;
-
+        
         // Make sure that this component has the keyboard focus
         requestFocusInWindow();
         
@@ -307,23 +322,44 @@ public class GameCourt extends JPanel {
     public void paintComponent(Graphics g) {
         super.paintComponent(g);
         
-        board.draw(g);
-        if (validPaths != null && !displayingEvolving) {
-	        Collection<CreaturePath> paths = validPaths.values();
-	        for (CreaturePath path : paths) {
-	        	path.draw(g, frame);
-	        }
+        if (start) {
+            Image img = null;
+            try {
+                img = ImageIO.read(new File("resources/start.png"));
+            } catch (IOException e) {
+                System.out.println("Internal Error:" + e.getMessage());
+            }
+
+            g.drawImage(img, 0, 0, 600, 600, null);
+        } else if (!start && instructions) {
+            Image img = null;
+            try {
+                img = ImageIO.read(new File("resources/instructions.png"));
+            } catch (IOException e) {
+                System.out.println("Internal Error:" + e.getMessage());
+            }
+
+            g.drawImage(img, 0, 0, 600, 600, null);
+        } else {
+            board.draw(g);
+            if (validPaths != null && !displayingEvolving) {
+                Collection<CreaturePath> paths = validPaths.values();
+                for (CreaturePath path : paths) {
+                    path.draw(g, frame);
+                }
+            }
+            
+            for (int i = 0; i < players.length; i++) {
+                players[i].draw(g);
+            }
+            
+            for (int i = 0; i < traitDisplays.length; i++) {
+                if (traitDisplays[i] != null) traitDisplays[i].draw(g);
+            }
+            if (traitToAddDisplay != null) traitToAddDisplay.draw(g);
         }
-        
-        for (int i = 0; i < players.length; i++) {
-        	players[i].draw(g);
-        }
-        
-        for (int i = 0; i < traitDisplays.length; i++) {
-        	if (traitDisplays[i] != null) traitDisplays[i].draw(g);
-        }
-        if (traitToAddDisplay != null) traitToAddDisplay.draw(g);
     }
+    
 
     @Override
     public Dimension getPreferredSize() {
