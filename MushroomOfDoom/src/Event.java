@@ -4,12 +4,8 @@ import java.io.IOException;
 
 import javax.imageio.ImageIO;
 
-public class Event {
-    String name;
-    String description; // Actual text of the trait?
+public class Event extends Card {
     String warning;
-    String filename;
-    Image image;
     
     // not all events cause death! xoxo
     boolean causeDeath;
@@ -30,12 +26,8 @@ public class Event {
             boolean death, boolean warn, boolean move, boolean lose,
                 boolean water, boolean jungle, boolean tundra, boolean sleep,
                 float prob) {
-        
-        this.name = name;
-        this.description = description;
+    	super(name, description, filename);
         this.warning = warnMsg;
-        this.filename = filename;
-        
         this.causeDeath = death;
         this.giveWarning = warn;
         this.migrate = move;
@@ -47,15 +39,6 @@ public class Event {
         this.needsNocturnalism = sleep;
          
         this.probability = prob;
-        
-        if (this.filename != "") {
-            try {
-                image = ImageIO.read(new File("resources/textures/" + filename));
-            }
-            catch (IOException e) {
-                System.out.println("Internal Error:" + e.getMessage());
-            }
-        }
     }
     
 }

@@ -5,12 +5,7 @@ import java.io.IOException;
 
 import javax.imageio.ImageIO;
 
-public class Trait {
-	public String name;
-	public String description; // Actual text of the trait
-	public String imgFileName; // Name of image file for this trait
-	public Image img;
-	
+public class Trait extends Card {
 	// "Dice roll" bonuses
 	public int movementBonus = 0;
 	public int attackBonus = 0;
@@ -28,9 +23,7 @@ public class Trait {
 				 int movBonus, int attBonus, 
 				 boolean wtrMov, boolean jglMov, boolean tdrMov, boolean noct, 
 				 float prob) {
-		this.name = name;
-		this.description = description;
-		this.imgFileName = imgFileName;
+		super(name, description, imgFileName);
 		this.movementBonus = movBonus;
 		this.attackBonus = attBonus;
 		this.waterMovement = wtrMov;
@@ -38,14 +31,5 @@ public class Trait {
 		this.tundraMovement = tdrMov;
 		this.nocturnalism = noct;
 		this.probability = prob;
-		
-		if (imgFileName != "") {
-	    	try {
-	            img = ImageIO.read(new File("resources/textures/" + imgFileName));
-	    	}
-	    	catch (IOException e) {
-	            System.out.println("Internal Error:" + e.getMessage());
-	        }
-		}
 	}
 }

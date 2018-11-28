@@ -39,8 +39,8 @@ public class GameCourt extends JPanel {
     private Map<BoardTile, CreaturePath> validPaths;
     
     public TraitDeck traitDeck;
-    public TraitDisplay[] traitDisplays;
-    public TraitDisplay traitToAddDisplay;
+    public CardDisplay[] traitDisplays;
+    public CardDisplay traitToAddDisplay;
     public Creature displayingCreature;
     public boolean displayingEvolving;
     public int traitToReplace;
@@ -118,7 +118,7 @@ public class GameCourt extends JPanel {
         		}
         		else if (userPickReplaceTrait && evolveAnimTick == 28) {
         			for (int i = 0; i < traitDisplays.length; i++) {
-        				TraitDisplay disp = traitDisplays[i];
+        				CardDisplay disp = traitDisplays[i];
         				if (x > disp.getPx() && x < disp.getPx() + disp.getWidth()) {
         					 if (y > disp.getPy() && y < disp.getPy() + disp.getHeight()) {
         						 traitToReplace = i;
@@ -185,7 +185,7 @@ public class GameCourt extends JPanel {
         	System.out.println("New player");
         }
         
-        traitDisplays = new TraitDisplay[3];
+        traitDisplays = new CardDisplay[3];
 
         playing = true;
         start = true;
@@ -232,7 +232,7 @@ public class GameCourt extends JPanel {
                 	}
             	}
             	if (evolveAnimTick == 50) {
-            		this.displayingCreature.traits[traitToReplace] = traitToAddDisplay.trait;
+            		if (traitToAddDisplay.card instanceof Trait) this.displayingCreature.traits[traitToReplace] = (Trait)traitToAddDisplay.card;
             		stopDisplayCreatureTraits();
             		evolveAnimTick = 0;
             		this.displayingEvolving = false;
@@ -255,11 +255,11 @@ public class GameCourt extends JPanel {
     	if (displayingCreature == c) return;
     	displayingCreature = c;
     	for (int i = 0; i < c.traits.length; i++) {
-    		traitDisplays[i] = new TraitDisplay(c.traits[i], this);
+    		traitDisplays[i] = new CardDisplay(c.traits[i], this);
     		traitDisplays[i].setPx((int) (c.getPx() + c.getWidth()/2.0));
     		traitDisplays[i].setPy((int) (c.getPy() + c.getHeight()/2.0));
     		traitDisplays[i].scale = 0f;
-    		traitDisplays[i].Xdes = COURT_WIDTH/c.traits.length * i + (COURT_WIDTH - (TraitDisplay.defaultWidth * c.traits.length))/(2 * c.traits.length);
+    		traitDisplays[i].Xdes = COURT_WIDTH/c.traits.length * i + (COURT_WIDTH - (CardDisplay.defaultWidth * c.traits.length))/(2 * c.traits.length);
     		traitDisplays[i].Ydes = 20;
     		traitDisplays[i].scaleDes = 1f;
     	}
@@ -288,7 +288,7 @@ public class GameCourt extends JPanel {
     	this.traitToReplace = whichTrait;
     	this.userPickReplaceTrait = userPick;
     	displayCreatureTraits(c);
-    	traitToAddDisplay = new TraitDisplay(t, this);
+    	traitToAddDisplay = new CardDisplay(t, this);
     	traitToAddDisplay.setPx(COURT_WIDTH/2 - traitToAddDisplay.getWidth()/2);
     	traitToAddDisplay.setPy(600);
     	traitToAddDisplay.scale = 1f;
