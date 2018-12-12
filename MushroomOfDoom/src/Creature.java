@@ -5,7 +5,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public abstract class Creature extends GameObj{
+public abstract class Creature extends GameObj {
+	public int id;
+	public static int numCreatures = 0;
+	
 	public int spaceX, spaceY;
 	public float animX, animY;
 	public Trait[] traits;
@@ -16,6 +19,7 @@ public abstract class Creature extends GameObj{
 	private CreaturePath currentPath;
 	private int pathTick;
 	private int currTile;
+	private int moveTime;
 	
 	private Creature shouldFight = null;
 	
@@ -23,10 +27,13 @@ public abstract class Creature extends GameObj{
 	
 	private boolean animating;
 	
-	private boolean loseTurn = false;
+	public boolean loseTurn = false;
 	
 	public Creature(int px, int py, GameCourt court, Color color) {
 		super(0, 0, px * (GameCourt.COURT_WIDTH/GameCourt.BOARD_DIMS), py * (GameCourt.COURT_HEIGHT/GameCourt.BOARD_DIMS), 15, 15, GameCourt.COURT_WIDTH, GameCourt.COURT_HEIGHT);
+		id = numCreatures;
+		numCreatures++;
+		
 		animX = spaceX = px;
 		animY = spaceY = py;
 		this.court = court;
@@ -65,6 +72,7 @@ public abstract class Creature extends GameObj{
 	public void animateAlongPath(CreaturePath path) {
 		currentPath = path;
 		pathTick = 0;
+		moveTime = 0;
 		currTile = 0;
 		animating = true;
 		animX = spaceX;
@@ -74,13 +82,8 @@ public abstract class Creature extends GameObj{
 	public void update() {
 		int speed = 3;
 		if (currentPath != null) {
-			
-			if (pathTick == speed) {
-				pathTick = 0;
-				currTile++;
-			}
-			
-			if (currTile == currentPath.getLength()) {
+			moveTime++;
+			if (moveTime > 100) {
 				currentPath = null;
 				animating = false;
 				this.stopAnimating();
@@ -88,16 +91,38 @@ public abstract class Creature extends GameObj{
 				animY = spaceY;
 			}
 			else {
-				BoardTile t1 = currentPath.getTiles().get(currTile);
-				if (currTile+1 == currentPath.getTiles().size()) {
-					System.out.println("");
+			
+				if (pathTick == speed) {
+					pathTick = 0;
+					currTile++;
 				}
-				BoardTile t2 = currentPath.getTiles().get(currTile + 1);
-				float u = (float)pathTick/(float)speed;
-				animX = (float)(t1.spaceX * (1.0f - u)) + (float)(t2.spaceX * u);
-				animY = (float)(t1.spaceY * (1.0f - u)) + (float)(t2.spaceY * u);
-				pathTick++;
+				
+				if (currTile == currentPath.getLength()) {
+					currentPath = null;
+					animating = false;
+					this.stopAnimating();
+					animX = spaceX;
+					animY = spaceY;
+				}
+				else {
+					if (currTile+1 == currentPath.getTiles().size()) {
+						animX = currentPath.getEnd().spaceX;
+						animY = currentPath.getEnd().spaceY;
+					}
+					else {
+						BoardTile t1 = currentPath.getTiles().get(currTile);
+						BoardTile t2 = currentPath.getTiles().get(currTile + 1);
+						float u = (float)pathTick/(float)speed;
+						animX = (float)(t1.spaceX * (1.0f - u)) + (float)(t2.spaceX * u);
+						animY = (float)(t1.spaceY * (1.0f - u)) + (float)(t2.spaceY * u);
+						pathTick++;
+					}
+				}
 			}
+		}
+		else {
+			animX = spaceX;
+			animY = spaceY;
 		}
 		setPx((int)(animX * ((float)GameCourt.COURT_WIDTH/(float)GameCourt.BOARD_DIMS)));
 		setPy((int)(animY * ((float)GameCourt.COURT_HEIGHT/(float)GameCourt.BOARD_DIMS)));

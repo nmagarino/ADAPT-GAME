@@ -14,19 +14,20 @@ public class EventDeck {
                 new Event("Nothing", "", "", "Event-Nothing.jpg",
                             false, false, false, false,
                             false, false, false, false, 
-                            .0f),
+                            1.0f),
                 
                 new Event("Flood", "The beaches are flooded!", 
                         "The water is rising...", "Event-Flood.jpg",
                         true, true, false, false,
                         true, false, false, false,
-                        .1f) {
+                        0.1f) {
                 	@Override
                 	public void doEffect() {
                 		for(int i = 0; i < court.board.board.length; i++) {
                 			for(int j = 0; j < court.board.board[i].length; j++) {
                 				if(court.board.board[i][j].type == BoardTile.EnumTileType.BEACH) {
                     				court.board.board[i][j].type = BoardTile.EnumTileType.BEACH_FLOODED;
+                    				court.board.board[i][j].turnsUntilBeach = 2;
                 				}
                 			}
                 		}
@@ -61,7 +62,7 @@ public class EventDeck {
                 },
                 
                 new Event("Volcanic Erruption", "You're all dead!", 
-                        "The volcano seems to be waking up....", "Event-Volcano.jpg",
+                        "The ground is rumbling...", "Event-Volcano.jpg",
                         true, true, false, false,
                         false, false, false, false,
                         .1f) {
@@ -98,7 +99,7 @@ public class EventDeck {
                         "", "Event-Migration.jpg",
                         false, false, true, false,
                         false, false, false, false,
-                        .1f) {
+                        .0f) {
                 	@Override
                 	public void doEffect() {
                 		
@@ -109,7 +110,7 @@ public class EventDeck {
                         "", "Event-Famine.jpg",
                         true, false, false, false,
                         false, true, false, false,
-                        .1f) {
+                        .0f) {
                 	@Override
                 	public void doEffect() {
                 		
@@ -117,13 +118,28 @@ public class EventDeck {
                 },
                 
                 new Event("Night", "If you do not have nocturnalism, lose a turn.", 
-                        "", "Event-Night.jpg",
+                        "It's getting darker...", "Event-Night.jpg",
                         false, false, false, true,
                         false, false, false, true,
                         .1f) {
                 	@Override
                 	public void doEffect() {
-                		
+                		for(int i = 0; i < court.players.length; i++) {
+                			Player currPlay = court.players[i];
+                			for(int j = 0; j < 3; j++) {
+                				if((currPlay.traits[j] != null && currPlay.traits[j].nocturnalism == false) || currPlay.traits[j] == null) {
+                					currPlay.loseTurn = true;
+                				}
+                			}
+                		}
+                		for(int i = 0; i < court.enemies.size(); i++) {
+                			Enemy currPlay = court.enemies.get(i);
+                			for(int j = 0; j < currPlay.traits.length; j++) {
+                				if(currPlay.traits[j] != null && currPlay.traits[j].nocturnalism == false) {
+                					currPlay.loseTurn = true;
+                				}
+                			}
+                		}
                 	}
                 }
         };

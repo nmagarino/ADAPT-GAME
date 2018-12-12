@@ -246,7 +246,7 @@ public class GameCourt extends JPanel {
 
 		playing = false;
 		start = true;
-		status.setText("Running...");
+		status.setText(nextEvent.warning);
 		frame = 0;
 		evolveAnimTick = 0;
 		isAnimating = false;
@@ -330,12 +330,19 @@ public class GameCourt extends JPanel {
 		eventDisplay = new EventDisplay(nextEvent, this);
 		nextEvent.doEffect();
 		nextEvent = eventDeck.randomEvent();
+		status.setText(nextEvent.warning);
 
 		// do enemy stuff
 
 		// move current enemies
 		for (int i = 0; i < this.enemies.size(); i++) {
-			enemies.get(i).doTurn();
+			Enemy e = enemies.get(i);
+			if (!e.loseTurn) {
+				e.doTurn();
+			}
+			else {
+				e.loseTurn = false;
+			}
 		}
 
 		// possibly make new creature
@@ -422,6 +429,12 @@ public class GameCourt extends JPanel {
 	}
 
 	public void fight(Creature attacker, Creature defender, BoardTile tile) {
+		if (attacker.id == defender.id) {
+			this.combatCreature1 = null;
+			this.combatCreature2 = null;
+			return;
+		}
+		
 		if (attacker.getCombat() > defender.getCombat()) {
 			winningCreature = attacker;
 			losingCreature = defender;
@@ -476,6 +489,11 @@ public class GameCourt extends JPanel {
 			endTurnCycle();
 		}
 		validPaths = players[whosTurn - 1].getPotentialPaths();
+		
+		if (players[whosTurn - 1].loseTurn) {
+			players[whosTurn - 1].loseTurn = false;
+			incrementTurn();
+		}
 	}
 
 	public Creature mouseOverCreature(int x, int y) {
