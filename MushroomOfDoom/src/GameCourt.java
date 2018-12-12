@@ -59,8 +59,14 @@ public class GameCourt extends JPanel {
 	public CombatDisplay combatDisplay;
 	public Creature combatCreature1;
 	public Creature combatCreature2;
+	public Creature losingCreature;
+	public Creature winningCreature;
+	public boolean userPickStealTrait;
+	public int stolenTrait;
 
 	public EventDisplay eventDisplay;
+	
+	public VictoryDisplay victoryDisplay = null;
 
 	// Game constants
 	public static final int BOARD_DIMS = 40;
@@ -113,6 +119,7 @@ public class GameCourt extends JPanel {
 				} else if (!start && instructions) {
 					if (e.getKeyCode() == KeyEvent.VK_ENTER) {
 						instructions = false;
+						playing = true;
 					}
 				}
 			}
@@ -129,7 +136,7 @@ public class GameCourt extends JPanel {
 				int spaceX = x / (GameCourt.COURT_WIDTH / GameCourt.BOARD_DIMS);
 				int spaceY = y / (GameCourt.COURT_HEIGHT / GameCourt.BOARD_DIMS);
 
-				if (!displayingEvolving && !isAnimating) {
+				if (!displayingEvolving && !isAnimating && !userPickStealTrait && playing) {
 					Player currPlayer = players[whosTurn - 1];
 					CreaturePath path = validPaths.get(board.board[spaceX][spaceY]);
 					if (path != null) {
@@ -137,13 +144,29 @@ public class GameCourt extends JPanel {
 						currPlayer.moveCreatureToTile(spaceX, spaceY);
 						incrementTurn();
 					}
-				} else if (userPickReplaceTrait && evolveAnimTick == 28) {
+				}
+				else if (userPickReplaceTrait && evolveAnimTick == 28 && playing) {
 					for (int i = 0; i < traitDisplays.length; i++) {
 						CardDisplay disp = traitDisplays[i];
 						if (x > disp.getPx() && x < disp.getPx() + disp.getWidth()) {
 							if (y > disp.getPy() && y < disp.getPy() + disp.getHeight()) {
 								traitToReplace = i;
 								evolveAnimTick++;
+							}
+						}
+					}
+				}
+				else if (userPickStealTrait && playing) {
+					for (int i = 0; i < traitDisplays.length; i++) {
+						CardDisplay disp = traitDisplays[i];
+						if (x > disp.getPx() && x < disp.getPx() + disp.getWidth()) {
+							if (y > disp.getPy() && y < disp.getPy() + disp.getHeight()) {
+								if (losingCreature.traits[i] != null && losingCreature.traits[i].name != "None") {
+									stolenTrait = i;
+									userPickStealTrait = false;
+									stopDisplayCreatureTraits();
+									if (winningCreature instanceof Player) ((Player)winningCreature).evolve(losingCreature.traits[stolenTrait]);
+								}
 							}
 						}
 					}
@@ -160,9 +183,9 @@ public class GameCourt extends JPanel {
 				int spaceY = y / (GameCourt.COURT_HEIGHT / GameCourt.BOARD_DIMS);
 
 				Creature c = mouseOverCreature(x, y);
-				if (c != null && !displayingEvolving) {
+				if (c != null && !displayingEvolving && !userPickStealTrait && playing) {
 					displayCreatureTraits(c);
-				} else if (!displayingEvolving) {
+				} else if (!displayingEvolving && !userPickStealTrait && playing) {
 					stopDisplayCreatureTraits();
 				}
 
@@ -206,7 +229,7 @@ public class GameCourt extends JPanel {
 		for (int i = 0; i < board.startTiles.size(); i++) {
 			BoardTile start = board.startTiles.get(i);
 			Color nextColor = colors[Math.min(i, colors.length)];
-			players[i] = new Player(start.spaceX, start.spaceY, this, nextColor);
+			players[i] = new Player(start.spaceX, start.spaceY, this, nextColor, i + 1);
 			System.out.println("New player");
 		}
 		enemies = new ArrayList<Enemy>();
@@ -220,7 +243,7 @@ public class GameCourt extends JPanel {
 
 		nextEvent = eventDeck.randomEvent();
 
-		playing = true;
+		playing = false;
 		start = true;
 		status.setText("Running...");
 		frame = 0;
@@ -286,8 +309,8 @@ public class GameCourt extends JPanel {
 			frame++;
 
 			// update the display
-			repaint();
 		}
+		repaint();
 	}
 
 	private void endTurnCycle() {
@@ -356,8 +379,6 @@ public class GameCourt extends JPanel {
 	}
 
 	public void fight(Creature attacker, Creature defender, BoardTile tile) {
-		Creature winningCreature;
-		Creature losingCreature;
 		if (attacker.getCombat() > defender.getCombat()) {
 			winningCreature = attacker;
 			losingCreature = defender;
@@ -373,6 +394,15 @@ public class GameCourt extends JPanel {
 
 	public void stopFight() {
 		combatDisplay = null;
+		boolean loserHasTraits = false;
+		for (int i = 0; i < losingCreature.traits.length; i++) {
+			if (losingCreature.traits[i] != null && losingCreature.traits[i].name != "None") {
+				loserHasTraits = true;
+				break;
+			}
+		}
+		if (userPickStealTrait && loserHasTraits) displayCreatureTraits(losingCreature);
+		else userPickStealTrait = false;
 	}
 
 	public void displayEvolving(Creature c, Trait t, int whichTrait, boolean userPick) {
@@ -411,6 +441,13 @@ public class GameCourt extends JPanel {
 				}
 			}
 		}
+		for (Creature p : enemies) {
+			if (x > p.getPx() && x < p.getPx() + p.getWidth()) {
+				if (y > p.getPy() && y < p.getPy() + p.getHeight()) {
+					return p;
+				}
+			}
+		}
 		return null;
 	}
 
@@ -438,7 +475,7 @@ public class GameCourt extends JPanel {
 			g.drawImage(img, 0, 0, 600, 600, null);
 		} else {
 			board.draw(g);
-			if (validPaths != null && !displayingEvolving && !isAnimating) {
+			if (validPaths != null && !displayingEvolving && !isAnimating && !userPickStealTrait && playing) {
 				Collection<CreaturePath> paths = validPaths.values();
 				for (CreaturePath path : paths) {
 					path.draw(g, frame);
@@ -464,6 +501,8 @@ public class GameCourt extends JPanel {
 				eventDisplay.draw(g);
 			if (combatDisplay != null)
 				combatDisplay.draw(g);
+			if (victoryDisplay != null)
+				victoryDisplay.draw(g);
 		}
 	}
 

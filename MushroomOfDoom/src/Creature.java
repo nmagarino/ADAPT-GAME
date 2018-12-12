@@ -17,6 +17,8 @@ public abstract class Creature extends GameObj{
 	private int pathTick;
 	private int currTile;
 	
+	private Creature shouldFight = null;
+	
 	public Color color;
 	
 	private boolean animating;
@@ -38,7 +40,7 @@ public abstract class Creature extends GameObj{
 	
 	public int getMovement() {
 		// default movement is 5, bonus adds on to this
-		int sum = 5;
+		int sum = 50;
 		for (int i = 0; i < traits.length; i++) {
 			if (traits[i] != null) {
 				sum += traits[i].movementBonus;
@@ -83,7 +85,7 @@ public abstract class Creature extends GameObj{
 				animX = spaceX;
 				animY = spaceY;
 			}
-			else {
+			else if (currTile + 1 < currentPath.getTiles().size()) {
 				BoardTile t1 = currentPath.getTiles().get(currTile);
 				BoardTile t2 = currentPath.getTiles().get(currTile + 1);
 				float u = (float)pathTick/(float)speed;
@@ -98,6 +100,10 @@ public abstract class Creature extends GameObj{
 	
 	protected void stopAnimating() {
 		court.stopAnimating();
+		if (shouldFight != null) {
+			court.fight(this, shouldFight, court.board.board[spaceX][spaceY]);
+			shouldFight = null;
+		}
 	}
 
 	private Pos minDistance(CreaturePath[][] d, boolean[][] sptSet) { 
@@ -124,7 +130,7 @@ public abstract class Creature extends GameObj{
 		spaceY = y;
 		Creature onTile = court.board.board[spaceX][spaceY].creatureOnTile;
 		if (onTile != null) {
-			court.fight(this, onTile, court.board.board[spaceX][spaceY]);
+			shouldFight = onTile;
 		}
 		else {
 			court.board.board[spaceX][spaceY].creatureOnTile = this;
@@ -133,7 +139,7 @@ public abstract class Creature extends GameObj{
 	
 	public void die(Creature killer) {
 		if (killer instanceof Player) {
-			
+			court.userPickStealTrait = true;
 		}
 		else {
 			int howManyTraits = 0;
@@ -198,7 +204,7 @@ public abstract class Creature extends GameObj{
 		Map<BoardTile, CreaturePath> validPaths = new HashMap<BoardTile, CreaturePath>();
 		for (int i = 0; i < d.length; i++) {
 			for (int j = 0; j < d[0].length; j++) {
-				if (d[i][j].getLength() <= move && !d[i][j].getTiles().isEmpty()) validPaths.put(d[i][j].getEnd(), d[i][j]);
+				if (d[i][j].getLength() <= move && !d[i][j].getTiles().isEmpty() && d[i][j].getEnd().whosHome == null) validPaths.put(d[i][j].getEnd(), d[i][j]);
 			}
 		}
 		

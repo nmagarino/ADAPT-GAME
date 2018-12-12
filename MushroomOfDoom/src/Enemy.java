@@ -15,7 +15,7 @@ public class Enemy extends Creature {
 
 		// Determines how many traits the new creature will have
 		// Naturally, more traits means a stronger creature
-		int rand = (int) ((Math.random() * 2.0) + 1.0);
+		int rand = (int) ((Math.random() * 3.0) + 1.0);
 		for (int i = 0; i < rand - 1; i++) {
 			this.traits[i] = court.traitDeck.getRandomTrait();
 		}

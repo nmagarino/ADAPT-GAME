@@ -30,6 +30,7 @@ public class BoardTile extends GameObj {
 	public BoardTile[] adjacent;
 	
 	public Creature creatureOnTile;
+	public Creature whosHome;
 	
 	public BoardTile(EnumTileType type, int posX, int posY) {
 		super(0, 0,
@@ -53,6 +54,14 @@ public class BoardTile extends GameObj {
 			this.turnsUntilNestActive = 3;
 			this.type = EnumTileType.NEST_INACTIVE;
 		}
+	}
+	
+	public boolean isNestOnLand() {
+		if (up != null && (up.type == EnumTileType.LAND || up.type == EnumTileType.FOREST || up.type == EnumTileType.TUNDRA || up.type == EnumTileType.BEACH)) return true;
+		if (down != null && (down.type == EnumTileType.LAND || down.type == EnumTileType.FOREST || down.type == EnumTileType.TUNDRA || down.type == EnumTileType.BEACH)) return true;
+		if (right != null && (right.type == EnumTileType.LAND || right.type == EnumTileType.FOREST || right.type == EnumTileType.TUNDRA || right.type == EnumTileType.BEACH)) return true;
+		if (left != null && (left.type == EnumTileType.LAND || left.type == EnumTileType.FOREST || left.type == EnumTileType.TUNDRA || left.type == EnumTileType.BEACH)) return true;
+		return false;
 	}
 	
 	public int getWeight(Creature creature, int currDist) {
@@ -121,7 +130,15 @@ public class BoardTile extends GameObj {
 		else {
 			g.setColor(new Color(45, 110, 190));
 		}
-        
-        g.fillRect(this.getPx(), this.getPy(), this.getWidth(), this.getHeight());
+		
+		if (whosHome != null) {
+			g.setColor(Color.BLACK);
+			g.fillRect(this.getPx(), this.getPy(), this.getWidth(), this.getHeight());
+			g.setColor(whosHome.color);
+			g.fillRect(this.getPx() + 2, this.getPy() + 2, this.getWidth() - 4, this.getHeight() - 4);
+		}
+		else {
+			g.fillRect(this.getPx(), this.getPy(), this.getWidth(), this.getHeight());
+		}
     }
 }
