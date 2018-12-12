@@ -581,7 +581,9 @@ public class GameCourt extends JPanel {
 		BoardTile randLand = landTiles.get(rand);
 
 		// add enemy to this random spot
-		this.enemies.add(new Enemy(randLand.spaceX, randLand.spaceY, this));
+		Enemy e = new Enemy(randLand.spaceX, randLand.spaceY, this);
+		this.enemies.add(e);
+		randLand.creatureOnTile = e;
 
 	}
 }
