@@ -65,7 +65,7 @@ public class GameCourt extends JPanel {
 	public int stolenTrait;
 
 	public EventDisplay eventDisplay;
-	
+
 	public VictoryDisplay victoryDisplay = null;
 
 	// Game constants
@@ -144,8 +144,7 @@ public class GameCourt extends JPanel {
 						currPlayer.moveCreatureToTile(spaceX, spaceY);
 						incrementTurn();
 					}
-				}
-				else if (userPickReplaceTrait && evolveAnimTick == 28 && playing) {
+				} else if (userPickReplaceTrait && evolveAnimTick == 28 && playing) {
 					for (int i = 0; i < traitDisplays.length; i++) {
 						CardDisplay disp = traitDisplays[i];
 						if (x > disp.getPx() && x < disp.getPx() + disp.getWidth()) {
@@ -155,8 +154,7 @@ public class GameCourt extends JPanel {
 							}
 						}
 					}
-				}
-				else if (userPickStealTrait && playing) {
+				} else if (userPickStealTrait && playing) {
 					for (int i = 0; i < traitDisplays.length; i++) {
 						CardDisplay disp = traitDisplays[i];
 						if (x > disp.getPx() && x < disp.getPx() + disp.getWidth()) {
@@ -165,7 +163,8 @@ public class GameCourt extends JPanel {
 									stolenTrait = i;
 									userPickStealTrait = false;
 									stopDisplayCreatureTraits();
-									if (winningCreature instanceof Player) ((Player)winningCreature).evolve(losingCreature.traits[stolenTrait]);
+									if (winningCreature instanceof Player)
+										((Player) winningCreature).evolve(losingCreature.traits[stolenTrait]);
 								}
 							}
 						}
@@ -233,11 +232,10 @@ public class GameCourt extends JPanel {
 			System.out.println("New player");
 		}
 		enemies = new ArrayList<Enemy>();
-		double rand = Math.random();
-		if (rand < .7) {
+		int randSpawns = (int) (Math.random() * 4.0);
+		for (int i = 0; i < randSpawns; i++) {
 			this.createNPC();
 		}
-		// enemies.add(new Enemy(5, 5, this));
 
 		traitDisplays = new CardDisplay[3];
 
@@ -326,9 +324,12 @@ public class GameCourt extends JPanel {
 		}
 
 		// possibly make new creature
-		double rand = Math.random();
-		if (rand < 1.0) {
-			this.createNPC();
+		int randSpawns = (int) (Math.random() * 4.0);
+
+		for (int i = 0; i < randSpawns; i++) {
+			if (enemies.size() < this.MAX_ENEMIES) {
+				this.createNPC();
+			}
 		}
 
 		board.endCycle();
@@ -401,8 +402,10 @@ public class GameCourt extends JPanel {
 				break;
 			}
 		}
-		if (userPickStealTrait && loserHasTraits) displayCreatureTraits(losingCreature);
-		else userPickStealTrait = false;
+		if (userPickStealTrait && loserHasTraits)
+			displayCreatureTraits(losingCreature);
+		else
+			userPickStealTrait = false;
 	}
 
 	public void displayEvolving(Creature c, Trait t, int whichTrait, boolean userPick) {
@@ -514,7 +517,7 @@ public class GameCourt extends JPanel {
 	public void createNPC() {
 
 		System.out.println("New NPC");
-		
+
 		// store all land tiles
 		ArrayList<BoardTile> landTiles = new ArrayList<BoardTile>();
 		for (int i = 0; i < this.board.board.length; i++) {
@@ -526,8 +529,9 @@ public class GameCourt extends JPanel {
 		}
 
 		int rand = (int) (Math.random() * landTiles.size());
-		//System.out.print("Land tile #" + rand + " out of " + landTiles.size() + " tiles");
-		
+		// System.out.print("Land tile #" + rand + " out of " + landTiles.size() + "
+		// tiles");
+
 		BoardTile randLand = landTiles.get(rand);
 
 		// add enemy to this random spot

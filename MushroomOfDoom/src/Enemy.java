@@ -5,10 +5,16 @@ import java.util.Map;
 import java.util.Set;
 
 public class Enemy extends Creature {
+	public static int numEnemies = 0;
+	int id;
 
 	public Enemy(int posX, int posY, GameCourt court) {
+		
+		
 		// this position should be a random spot on the map, that is land.
 		super(posX, posY, court, Color.WHITE);
+		id = numEnemies;
+		numEnemies++;
 		// Enemy starts on land
 		this.hasLegs = true;
 		this.hasFlagellum = false;
@@ -16,16 +22,15 @@ public class Enemy extends Creature {
 		// Determines how many traits the new creature will have
 		// Naturally, more traits means a stronger creature
 		int rand = (int) ((Math.random() * 3.0) + 1.0);
-		for (int i = 0; i < rand - 1; i++) {
+		for (int i = 0; i < rand; i++) {
 			this.traits[i] = court.traitDeck.getRandomTrait();
 		}
 		
-		//this.traits = new Trait[3]; // check weak creature
 	}
 
 	// Decides to move randomly (do nothing), pursue player, or run from player.
 	public void doTurn() {
-		Player closestPlayer = findClosestPlayer();
+		Creature closestPlayer = findClosestPlayer();
 
 		Map<BoardTile, CreaturePath> possPaths = this.getPotentialPaths();
 		// pick path from here!
@@ -56,7 +61,7 @@ public class Enemy extends Creature {
 			// this.court.whosTurn++;
 		}
 		// Pursue closest player. Move to tile closest to player (or to player)
-		else if (this.getCombat() >= closestPlayer.getCombat()) {
+		else if (this.getCombat() > closestPlayer.getCombat()) {
 			System.out.println("Pursue player");
 
 			// Find tile closest to player
@@ -106,7 +111,12 @@ public class Enemy extends Creature {
 			toMoveTo = furthestTile;
 
 		}
-
+		
+		// enemy cannot go to nest
+		if (toMoveTo.type == BoardTile.EnumTileType.NEST) {
+			toMoveTo = toMoveTo.right;
+		}
+		
 		CreaturePath selectedPath = possPaths.get(toMoveTo);
 
 		// then move enemy
@@ -119,14 +129,14 @@ public class Enemy extends Creature {
 		this.moveCreatureToTile(last.spaceX, last.spaceY);
 	}
 
-	private Player findClosestPlayer() {
+	private Creature findClosestPlayer() {
 		// Enemy only notices a player within a certain range,
 		// and acts based on this closest player's power.
 		// This A.I. is kind of dumb.
 
 		// Store all players in range
 		int range = 5;
-		ArrayList<Player> playersInRange = new ArrayList<Player>();
+		ArrayList<Creature> playersInRange = new ArrayList<Creature>();
 		for (int i = this.spaceX - range; i < this.spaceX + range; i++) {
 			for (int j = this.spaceY - range; j < this.spaceY + range; j++) {
 				
@@ -151,8 +161,8 @@ public class Enemy extends Creature {
 				
 				BoardTile currTile = this.court.board.board[spaceNumX][spaceNumY];
 				Creature creatureOnTile = currTile.creatureOnTile;
-				if (creatureOnTile != null && creatureOnTile.getClass() == Player.class) {
-					playersInRange.add((Player) creatureOnTile);
+				if (creatureOnTile != null) {
+					playersInRange.add(creatureOnTile);
 				}
 			}
 		}
@@ -162,10 +172,10 @@ public class Enemy extends Creature {
 		}
 
 		// find minimum distance from these, and return this player
-		Player closestPlayer = playersInRange.get(0);
+		Creature closestPlayer = playersInRange.get(0);
 		double leastDist = Double.MAX_VALUE;
 		for (int i = 0; i < playersInRange.size(); i++) {
-			Player currPlayer = playersInRange.get(i);
+			Creature currPlayer = playersInRange.get(i);
 			double dist = Math.sqrt(
 					Math.pow(this.spaceX - currPlayer.spaceX, 2.0) + Math.pow(this.spaceX - currPlayer.spaceX, 2.0));
 			if (dist < leastDist) {
@@ -177,7 +187,7 @@ public class Enemy extends Creature {
 		return closestPlayer;
 	}
 
-	// Color enemies red
+	// Color enemies
 	@Override
 	public void draw(Graphics g) {
 		g.setColor(Color.BLACK);
@@ -192,6 +202,23 @@ public class Enemy extends Creature {
 			getPy() + 2,
 			getWidth() - 4, getHeight() - 4
 		);
+	}
+	
+	@Override
+	public void die(Creature killer) {
+		super.die(killer);
+		//Creature onTile = court.board.board[spaceX][spaceY].creatureOnTile;
+		this.court.board.board[spaceX][spaceY].creatureOnTile = killer;
+		// remove enemy from game
+		//System.out.println(court.enemies.size() + " enemies in game...");
+		
+		for(int i = 0; i < court.enemies.size(); i++) {
+			if(court.enemies.get(i).id == this.id) {
+				court.enemies.remove(i);
+			}
+		}
+		
+		System.out.println("Enemy has died, only " + court.enemies.size() + " enemies remain.");
 	}
 
 }
