@@ -16,8 +16,8 @@ public class Enemy extends Creature {
 		id = numEnemies;
 		numEnemies++;
 		// Enemy starts on land
-		this.hasLegs = true;
-		this.hasFlagellum = false;
+		legs = new Leg();
+		flagellum = null;
 
 		// Determines how many traits the new creature will have
 		// Naturally, more traits means a stronger creature
@@ -62,7 +62,7 @@ public class Enemy extends Creature {
 		}
 		// Pursue closest player. Move to tile closest to player (or to player)
 		else if (this.getCombat() > closestPlayer.getCombat()) {
-			System.out.println("Pursue player");
+			//System.out.println("Pursue player");
 
 			// Find tile closest to player
 			BoardTile closestTile = toMoveTo;
@@ -76,7 +76,7 @@ public class Enemy extends Creature {
 					closestTile = currtile;
 				}
 			}
-			System.out.println("Closest player is at " + closestPlayer.spaceX + ", " + closestPlayer.spaceY);
+			//System.out.println("Closest player is at " + closestPlayer.spaceX + ", " + closestPlayer.spaceY);
 			toMoveTo = closestTile;
 			
 			
@@ -88,12 +88,12 @@ public class Enemy extends Creature {
 				}
 			}
 			
-			System.out.println("Moving to space at " + toMoveTo.spaceX + ", " + toMoveTo.spaceY);
+			//System.out.println("Moving to space at " + toMoveTo.spaceX + ", " + toMoveTo.spaceY);
 
 		}
 		// Flee closest player. Move to tile furthest from player.
 		else {
-			System.out.println("Flee player");
+			//System.out.println("Flee player");
 
 			// find furthest boardtile from player
 			BoardTile furthestTile = toMoveTo;
@@ -208,7 +208,6 @@ public class Enemy extends Creature {
 	public void die(Creature killer) {
 		super.die(killer);
 		//Creature onTile = court.board.board[spaceX][spaceY].creatureOnTile;
-		this.court.board.board[spaceX][spaceY].creatureOnTile = killer;
 		// remove enemy from game
 		//System.out.println(court.enemies.size() + " enemies in game...");
 		

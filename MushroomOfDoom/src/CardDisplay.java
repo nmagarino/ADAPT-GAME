@@ -29,6 +29,12 @@ public class CardDisplay extends GameObj {
 		else if (card instanceof Event) {
 			color = new Color(153, 204, 255);
 		}
+		else if (card instanceof Leg) {
+			color = Color.CYAN;
+		}
+		else if (card instanceof Flag) {
+			color = Color.GREEN;
+		}
 		else {
 			color = Color.BLACK;
 		}

@@ -47,6 +47,8 @@ public class GameCourt extends JPanel {
 
 	public TraitDeck traitDeck;
 	public CardDisplay[] traitDisplays;
+	public CardDisplay legDisplay;
+	public CardDisplay flagDisplay;
 	public CardDisplay traitToAddDisplay;
 	public Creature displayingCreature;
 	public boolean displayingEvolving;
@@ -163,6 +165,7 @@ public class GameCourt extends JPanel {
 									stolenTrait = i;
 									userPickStealTrait = false;
 									stopDisplayCreatureTraits();
+									losingCreature.traits[stolenTrait] = null;
 									if (winningCreature instanceof Player)
 										((Player) winningCreature).evolve(losingCreature.traits[stolenTrait]);
 								}
@@ -274,6 +277,10 @@ public class GameCourt extends JPanel {
 			}
 			if (traitToAddDisplay != null)
 				traitToAddDisplay.update();
+			if (legDisplay != null)
+				legDisplay.update();
+			if (flagDisplay != null)
+				flagDisplay.update();
 
 			if (displayingEvolving) {
 				if (!(this.userPickReplaceTrait && evolveAnimTick == 28))
@@ -291,8 +298,16 @@ public class GameCourt extends JPanel {
 					}
 				}
 				if (evolveAnimTick == 50) {
-					if (traitToAddDisplay.card instanceof Trait)
+					if (traitToAddDisplay.card instanceof Trait) {
 						this.displayingCreature.traits[traitToReplace] = (Trait) traitToAddDisplay.card;
+						boolean hasAllTraits = true;
+						for (int i = 0; i < displayingCreature.traits.length; i++) {
+							if (displayingCreature.traits[i] == null || displayingCreature.traits[i].name == "None") hasAllTraits = false;
+						}
+						if (hasAllTraits) {
+							displayingCreature.legs = new Leg();
+						}
+					}
 					stopDisplayCreatureTraits();
 					evolveAnimTick = 0;
 					this.displayingEvolving = false;
@@ -354,6 +369,24 @@ public class GameCourt extends JPanel {
 			traitDisplays[i].Ydes = 20;
 			traitDisplays[i].scaleDes = 1f;
 		}
+		
+		legDisplay = new CardDisplay(c.legs, this);
+		legDisplay.setPx((int) (c.getPx() + c.getWidth() / 2.0));
+		legDisplay.setPy((int) (c.getPy() + c.getHeight() / 2.0));
+		legDisplay.scale = 0f;
+		legDisplay.Xdes = COURT_WIDTH / c.traits.length * 0
+				+ (COURT_WIDTH - (CardDisplay.defaultWidth * c.traits.length)) / (2 * c.traits.length);
+		legDisplay.Ydes = 300;
+		legDisplay.scaleDes = 1f;
+		
+		flagDisplay = new CardDisplay(c.flagellum, this);
+		flagDisplay.setPx((int) (c.getPx() + c.getWidth() / 2.0));
+		flagDisplay.setPy((int) (c.getPy() + c.getHeight() / 2.0));
+		flagDisplay.scale = 0f;
+		flagDisplay.Xdes = COURT_WIDTH / c.traits.length * 2
+				+ (COURT_WIDTH - (CardDisplay.defaultWidth * c.traits.length)) / (2 * c.traits.length);
+		flagDisplay.Ydes = 300;
+		flagDisplay.scaleDes = 1f;
 	}
 
 	public void stopDisplayCreatureTraits() {
@@ -366,6 +399,15 @@ public class GameCourt extends JPanel {
 			traitDisplays[i].Ydes = (int) (displayingCreature.getPy() + displayingCreature.getHeight() / 2.0);
 			traitDisplays[i].scaleDes = 0f;
 		}
+		
+		legDisplay.Xdes = (int) (displayingCreature.getPx() + displayingCreature.getWidth() / 2.0);
+		legDisplay.Ydes = (int) (displayingCreature.getPy() + displayingCreature.getHeight() / 2.0);
+		legDisplay.scaleDes = 0f;
+		
+		flagDisplay.Xdes = (int) (displayingCreature.getPx() + displayingCreature.getWidth() / 2.0);
+		flagDisplay.Ydes = (int) (displayingCreature.getPy() + displayingCreature.getHeight() / 2.0);
+		flagDisplay.scaleDes = 0f;
+		
 		if (traitToAddDisplay != null) {
 			traitToAddDisplay.Xdes = (int) (displayingCreature.getPx() + displayingCreature.getWidth() / 2.0);
 			traitToAddDisplay.Ydes = (int) (displayingCreature.getPy() + displayingCreature.getHeight() / 2.0);
@@ -499,6 +541,10 @@ public class GameCourt extends JPanel {
 			}
 			if (traitToAddDisplay != null)
 				traitToAddDisplay.draw(g);
+			if (legDisplay != null)
+				legDisplay.draw(g);
+			if (flagDisplay != null)
+				flagDisplay.draw(g);
 
 			if (eventDisplay != null)
 				eventDisplay.draw(g);

@@ -50,8 +50,8 @@ public class Player extends Creature {
 		homeX = spaceX;
 		homeY = spaceY;
 		court.board.board[homeX][homeY].whosHome = this;
-		if (court.board.board[homeX][homeY].isNestOnLand() && hasLegs) {
-			hasFlagellum = false;
+		if (court.board.board[homeX][homeY].isNestOnLand() && legs != null) {
+			flagellum = null;
 		}
 		
 		int whichTrait = 0;
@@ -69,12 +69,5 @@ public class Player extends Creature {
 			userPick = true;
 		}
 		court.displayEvolving(this, newTrait, whichTrait, userPick);
-		boolean hasAllTraits = true;
-		for (int i = 0; i < traits.length; i++) {
-			if (traits[0] == null || traits[0].name == "None") hasAllTraits = false;
-		}
-		if (hasAllTraits) {
-			hasLegs = true;
-		}
 	}
 }

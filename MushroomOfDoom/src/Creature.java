@@ -9,8 +9,8 @@ public abstract class Creature extends GameObj{
 	public int spaceX, spaceY;
 	public float animX, animY;
 	public Trait[] traits;
-	public boolean hasLegs;
-	public boolean hasFlagellum;
+	public Leg legs;
+	public Flag flagellum;
 	protected GameCourt court;
 	
 	private CreaturePath currentPath;
@@ -32,8 +32,8 @@ public abstract class Creature extends GameObj{
 		this.court = court;
 		court.board.board[spaceX][spaceY].creatureOnTile = this;
 		traits = new Trait[3];
-		hasLegs = false;
-		hasFlagellum = true;
+		legs = null;
+		flagellum = new Flag();
 //		traits[0] = court.traitDeck.traitArray[1];
 //		traits[1] = court.traitDeck.traitArray[2];
 //		traits[2] = court.traitDeck.traitArray[3];
@@ -42,7 +42,7 @@ public abstract class Creature extends GameObj{
 	
 	public int getMovement() {
 		// default movement is 5, bonus adds on to this
-		int sum = 50;
+		int sum = 5;
 		for (int i = 0; i < traits.length; i++) {
 			if (traits[i] != null) {
 				sum += traits[i].movementBonus;
@@ -87,8 +87,11 @@ public abstract class Creature extends GameObj{
 				animX = spaceX;
 				animY = spaceY;
 			}
-			else if (currTile + 1 < currentPath.getTiles().size()) {
+			else {
 				BoardTile t1 = currentPath.getTiles().get(currTile);
+				if (currTile+1 == currentPath.getTiles().size()) {
+					System.out.println("");
+				}
 				BoardTile t2 = currentPath.getTiles().get(currTile + 1);
 				float u = (float)pathTick/(float)speed;
 				animX = (float)(t1.spaceX * (1.0f - u)) + (float)(t2.spaceX * u);
@@ -214,14 +217,14 @@ public abstract class Creature extends GameObj{
 	}
 	
 	public boolean getLandMovement() {
-		return hasLegs;
+		return legs != null;
 	}
 	
 	public boolean getWaterMovement() {
 		for (int i = 0; i < traits.length; i++) {
 			if (traits[i] != null && traits[i].waterMovement) return true;
 		}
-		return hasFlagellum;
+		return flagellum != null;
 	}
 	
 	public boolean getJungleMovement() {
