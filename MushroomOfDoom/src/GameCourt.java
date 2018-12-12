@@ -211,7 +211,7 @@ public class GameCourt extends JPanel {
 
 		this.board = new GameBoard(BOARD_DIMS, BOARD_DIMS);
 		traitDeck = new TraitDeck();
-		eventDeck = new EventDeck();
+		eventDeck = new EventDeck(this);
 
 		validPaths = new HashMap<BoardTile, CreaturePath>();
 	}

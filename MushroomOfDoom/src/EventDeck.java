@@ -1,8 +1,10 @@
 
 public class EventDeck {
     Event[] eventArray;
+    GameCourt court;
     
-    public EventDeck() {
+    public EventDeck(GameCourt court) {
+    	this.court = court;
         this.eventArray = new Event[] {
                 // name, description, warning, filename
                 // death, warn, mig, lose,
@@ -14,7 +16,7 @@ public class EventDeck {
                             false, false, false, false, 
                             .0f),
                 
-                new Event("Flood", "If you don’t have the ability to move through water, die.", 
+                new Event("Flood", "The beaches are flooded!", 
                         "The water is rising...", "Event-Flood.jpg",
                         true, true, false, false,
                         true, false, false, false,

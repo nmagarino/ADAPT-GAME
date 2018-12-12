@@ -23,6 +23,8 @@ public abstract class Creature extends GameObj{
 	
 	private boolean animating;
 	
+	private boolean loseTurn = false;
+	
 	public Creature(int px, int py, GameCourt court, Color color) {
 		super(0, 0, px * (GameCourt.COURT_WIDTH/GameCourt.BOARD_DIMS), py * (GameCourt.COURT_HEIGHT/GameCourt.BOARD_DIMS), 15, 15, GameCourt.COURT_WIDTH, GameCourt.COURT_HEIGHT);
 		animX = spaceX = px;

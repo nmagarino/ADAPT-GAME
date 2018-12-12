@@ -31,6 +31,10 @@ public class GameBoard {
 					tile.turnsUntilNestActive--;
 					if (tile.turnsUntilNestActive <= 0) tile.type = BoardTile.EnumTileType.NEST;
 				}
+				if (tile.type == BoardTile.EnumTileType.BEACH_FLOODED && tile.turnsUntilBeach > 0) {
+					tile.turnsUntilBeach--;
+					if (tile.turnsUntilBeach <= 0) tile.type = BoardTile.EnumTileType.BEACH;
+				}
 			}
 		}
 	}

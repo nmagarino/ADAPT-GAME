@@ -26,6 +26,7 @@ public class BoardTile extends GameObj {
 	public BoardTile right;
 	
 	public int turnsUntilNestActive;
+	public int turnsUntilBeach;
 	
 	public BoardTile[] adjacent;
 	
