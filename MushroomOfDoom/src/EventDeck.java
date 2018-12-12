@@ -23,45 +23,109 @@ public class EventDeck {
                         .1f) {
                 	@Override
                 	public void doEffect() {
-                		
+                		for(int i = 0; i < court.board.board.length; i++) {
+                			for(int j = 0; j < court.board.board[i].length; j++) {
+                				if(court.board.board[i][j].type == BoardTile.EnumTileType.BEACH) {
+                    				court.board.board[i][j].type = BoardTile.EnumTileType.BEACH_FLOODED;
+                				}
+                			}
+                		}
                 	}
                 },
                 
-                new Event("Blizzard", "If you don’t have the ability to move through tundra, die.", 
+                new Event("Blizzard", "If you don't have the ability to move through tundra, die.", 
                         "It's getting colder...", "Event-Blizzard.jpg",
                         true, true, false, false,
                         false, false, true, false,
-                        .1f),
+                        .1f) {
+                	@Override
+                	public void doEffect() {
+                		for(int i = 0; i < court.players.length; i++) {
+                			Player currPlay = court.players[i];
+                			for(int j = 0; j < 3; j++) {
+                				if((currPlay.traits[j] != null && currPlay.traits[j].tundraMovement == false) || currPlay.traits[j] == null) {
+                					System.out.println("Player dies from tundra!");
+                					currPlay.die(null);
+                				}
+                			}
+                		}
+                		for(int i = 0; i < court.enemies.size(); i++) {
+                			Enemy currPlay = court.enemies.get(i);
+                			for(int j = 0; j < currPlay.traits.length; j++) {
+                				if(currPlay.traits[j] != null && currPlay.traits[j].tundraMovement == false) {
+                					currPlay.die(null);
+                				}
+                			}
+                		}
+                	}
+                },
                 
                 new Event("Volcanic Erruption", "You're all dead!", 
                         "The volcano seems to be waking up....", "Event-Volcano.jpg",
                         true, true, false, false,
                         false, false, false, false,
-                        .1f),
+                        .1f) {
+                	@Override
+                	public void doEffect() {
+                		for(int i = 0; i < court.players.length; i++) {
+                			court.players[i].die(null);
+                		}
+                		for(int i = 0; i < court.enemies.size(); i++) {
+                			court.enemies.get(i).die(null);
+                		}
+                	}
+                },
                 
                 new Event("Meteor", "You're all dead!", 
                         "", "Event-Meteor.jpg",
                         true, false, false, false,
                         false, false, false, false,
-                        .1f),
+                        .1f) {
+                	@Override
+                	public void doEffect() {
+                		for(int i = 0; i < court.players.length; i++) {
+                			court.players[i].die(null);
+                			//court.players[i].update();
+                		}
+                		for(int i = 0; i < court.enemies.size(); i++) {
+                			court.enemies.get(i).die(null);
+                			//court.enemies.get(i).update();
+                		}
+                	}
+                },
                 
                 new Event("Migration", "Move your home token to any used nest.", 
                         "", "Event-Migration.jpg",
                         false, false, true, false,
                         false, false, false, false,
-                        .1f),
+                        .1f) {
+                	@Override
+                	public void doEffect() {
+                		
+                	}
+                },
                 
                 new Event("Famine", "If you do not reach a forest or kill another player this turn, you die.", 
                         "", "Event-Famine.jpg",
                         true, false, false, false,
                         false, true, false, false,
-                        .1f),
+                        .1f) {
+                	@Override
+                	public void doEffect() {
+                		
+                	}
+                },
                 
                 new Event("Night", "If you do not have nocturnalism, lose a turn.", 
                         "", "Event-Night.jpg",
                         false, false, false, true,
                         false, false, false, true,
-                        .1f)
+                        .1f) {
+                	@Override
+                	public void doEffect() {
+                		
+                	}
+                }
         };
     }
     
