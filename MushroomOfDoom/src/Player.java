@@ -1,11 +1,12 @@
+import java.awt.Color;
 
 public class Player extends Creature {
 	private int homeX;
 	private int homeY;
 	private boolean shouldEvolve;
 	
-	public Player(int posX, int posY, GameCourt court) {
-		super(posX, posY, court);
+	public Player(int posX, int posY, GameCourt court, Color color) {
+		super(posX, posY, court, color);
 		this.homeX = posX;
 		this.homeY = posY;
 		shouldEvolve = false;
@@ -18,6 +19,14 @@ public class Player extends Creature {
 	}
 	
 	@Override
+	public void die(Creature killer) {
+		super.die(killer);
+		spaceX = homeX;
+		spaceY = homeY;
+		Creature onTile = court.board.board[spaceX][spaceY].creatureOnTile;
+	}
+	
+	@Override
 	protected void stopAnimating() {
 		super.stopAnimating();
 		if (shouldEvolve) evolve();
@@ -26,6 +35,8 @@ public class Player extends Creature {
 	public void evolve() {
 		shouldEvolve = false;
 		court.board.board[spaceX][spaceY].useNest();
+		homeX = spaceX;
+		homeY = spaceY;
 		Trait newTrait = court.traitDeck.getRandomTrait();
 		int whichTrait = 0;
 		boolean userPick = false;

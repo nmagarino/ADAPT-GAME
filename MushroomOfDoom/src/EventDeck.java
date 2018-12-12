@@ -18,7 +18,12 @@ public class EventDeck {
                         "The water is rising...", "Event-Flood.jpg",
                         true, true, false, false,
                         true, false, false, false,
-                        .1f),
+                        .1f) {
+                	@Override
+                	public void doEffect() {
+                		
+                	}
+                },
                 
                 new Event("Blizzard", "If you don’t have the ability to move through tundra, die.", 
                         "It's getting colder...", "Event-Blizzard.jpg",

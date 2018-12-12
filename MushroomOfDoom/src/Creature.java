@@ -17,23 +17,27 @@ public abstract class Creature extends GameObj{
 	private int pathTick;
 	private int currTile;
 	
+	public Color color;
+	
 	private boolean animating;
 	
-	public Creature(int px, int py, GameCourt court) {
+	public Creature(int px, int py, GameCourt court, Color color) {
 		super(0, 0, px * (GameCourt.COURT_WIDTH/GameCourt.BOARD_DIMS), py * (GameCourt.COURT_HEIGHT/GameCourt.BOARD_DIMS), 15, 15, GameCourt.COURT_WIDTH, GameCourt.COURT_HEIGHT);
 		animX = spaceX = px;
 		animY = spaceY = py;
 		this.court = court;
+		court.board.board[spaceX][spaceY].creatureOnTile = this;
 		traits = new Trait[3];
 		hasLegs = false;
 		hasFlagellum = true;
 //		traits[0] = court.traitDeck.traitArray[1];
 //		traits[1] = court.traitDeck.traitArray[2];
 //		traits[2] = court.traitDeck.traitArray[3];
+		this.color = color;
 	}
 	
 	public int getMovement() {
-		return 5;
+		return 50;
 	}
 	
 	public int getCombat() {
@@ -104,7 +108,34 @@ public abstract class Creature extends GameObj{
 		court.board.board[spaceX][spaceY].creatureOnTile = null;
 		spaceX = x;
 		spaceY = y;
-		court.board.board[spaceX][spaceY].creatureOnTile = this;
+		Creature onTile = court.board.board[spaceX][spaceY].creatureOnTile;
+		if (onTile != null) {
+			court.fight(this, onTile, court.board.board[spaceX][spaceY]);
+		}
+		else {
+			court.board.board[spaceX][spaceY].creatureOnTile = this;
+		}
+	}
+	
+	public void die(Creature killer) {
+		if (killer instanceof Player) {
+			
+		}
+		else {
+			int howManyTraits = 0;
+			for (int i = 0; i < traits.length; i++) {
+				if (traits[i] != null && traits[i].name != "None") howManyTraits++;
+			}
+			int whichTrait = (int)Math.floor(Math.random() * (double)howManyTraits);
+			int traitCounter = -1;
+			for (int i = 0; i < traits.length; i++) {
+				if (traits[i] != null && traits[i].name != "None") traitCounter++;
+				if (traitCounter == whichTrait) {
+					traits[i] = null;
+					break;
+				}
+			}
+		}
 	}
 	
 	public Map<BoardTile, CreaturePath> getPotentialPaths() {
@@ -153,7 +184,7 @@ public abstract class Creature extends GameObj{
 		Map<BoardTile, CreaturePath> validPaths = new HashMap<BoardTile, CreaturePath>();
 		for (int i = 0; i < d.length; i++) {
 			for (int j = 0; j < d[0].length; j++) {
-				if (d[i][j].getLength() <= move && !d[i][j].getTiles().isEmpty() && (d[i][j].getEnd().creatureOnTile == null || d[i][j].getEnd().creatureOnTile == this)) validPaths.put(d[i][j].getEnd(), d[i][j]);
+				if (d[i][j].getLength() <= move && !d[i][j].getTiles().isEmpty()) validPaths.put(d[i][j].getEnd(), d[i][j]);
 			}
 		}
 		
@@ -187,10 +218,16 @@ public abstract class Creature extends GameObj{
 
 	public void draw(Graphics g) {
 		g.setColor(Color.BLACK);
-			g.fillOval(
-					getPx(),
-					getPy(),
-					getWidth(), getHeight()
-					);
+		g.fillOval(
+			getPx(),
+			getPy(),
+			getWidth(), getHeight()
+		);
+		g.setColor(color);
+		g.fillOval(
+			getPx() + 2,
+			getPy() + 2,
+			getWidth() - 4, getHeight() - 4
+		);
 	}
 }

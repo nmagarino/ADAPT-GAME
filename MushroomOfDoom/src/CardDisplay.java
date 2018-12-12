@@ -11,6 +11,7 @@ public class CardDisplay extends GameObj {
 	
 	public int Xdes, Ydes, Zdes = 0;
 	public float scaleDes = 1;
+	public float speed = 0.4f;
 	
 	public static int defaultWidth = 180;
 	public static int defaultHeight = 270;
@@ -25,15 +26,18 @@ public class CardDisplay extends GameObj {
 		if (card instanceof Trait) {
 			color = new Color(204, 102, 0);
 		}
+		else if (card instanceof Event) {
+			color = new Color(153, 204, 255);
+		}
 		else {
 			color = Color.BLACK;
 		}
 	}
 	
 	public void update() {
-		setPx((int)(getPx() + 0.4 * (Xdes - getPx())));
-		setPy((int)(getPy() + 0.4 * (Ydes - getPy())));
-		scale = (float) (scale + 0.4 * (scaleDes - scale));
+		setPx((int)(getPx() + speed * (Xdes - getPx())));
+		setPy((int)(getPy() + speed * (Ydes - getPy())));
+		scale = (float) (scale + speed * (scaleDes - scale));
 		
 		this.setHeight((int) (defaultHeight * scale));
 		this.setWidth((int) (defaultWidth * scale));

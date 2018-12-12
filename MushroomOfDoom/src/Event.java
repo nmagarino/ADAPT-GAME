@@ -8,16 +8,16 @@ public class Event extends Card {
     String warning;
     
     // not all events cause death! xoxo
-    boolean causeDeath;
-    boolean giveWarning;
-    boolean migrate;
-    boolean loseTurn;
+//    boolean causeDeath;
+//    boolean giveWarning;
+//    boolean migrate;
+//    boolean loseTurn;
     
     // traits needed to avoid death
-    boolean needsWater;
-    boolean needsRainforest;
-    boolean needsTundra;
-    boolean needsNocturnalism;
+//    boolean needsWater;
+//    boolean needsRainforest;
+//    boolean needsTundra;
+//    boolean needsNocturnalism;
     
     // Chance that this trait will appear in the deck
     float probability; 
@@ -28,17 +28,27 @@ public class Event extends Card {
                 float prob) {
     	super(name, description, filename);
         this.warning = warnMsg;
-        this.causeDeath = death;
-        this.giveWarning = warn;
-        this.migrate = move;
-        this.loseTurn = lose;
-       
-        this.needsWater = water;
-        this.needsRainforest = jungle;
-        this.needsTundra = tundra;
-        this.needsNocturnalism = sleep;
+//        this.giveWarning = warn;
+
+//        this.causeDeath = death;
+//        this.migrate = move;
+//        this.loseTurn = lose;
+//       
+//        this.needsWater = water;
+//        this.needsRainforest = jungle;
+//        this.needsTundra = tundra;
+//        this.needsNocturnalism = sleep;
          
         this.probability = prob;
+    }
+    
+    public Event(String name, String description, String warnMsg, String filename) {
+    	super(name, description, filename);
+    	this.warning = warnMsg;
+    }
+    
+    public void doEffect() {
+    	
     }
     
 }

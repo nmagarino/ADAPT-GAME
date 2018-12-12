@@ -10,6 +10,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.Map;
 
 import javax.imageio.ImageIO;
@@ -45,6 +46,15 @@ public class GameCourt extends JPanel {
     public boolean displayingEvolving;
     public int traitToReplace;
     public boolean userPickReplaceTrait;
+    
+    public EventDeck eventDeck;
+    public Event nextEvent;
+    
+    public CombatDisplay combatDisplay;
+    public Creature combatCreature1;
+    public Creature combatCreature2;
+    
+    public EventDisplay eventDisplay;
 
     // Game constants
     public static final int BOARD_DIMS = 40;
@@ -168,6 +178,7 @@ public class GameCourt extends JPanel {
         
         this.board = new GameBoard(BOARD_DIMS, BOARD_DIMS);
         traitDeck = new TraitDeck();
+        eventDeck = new EventDeck();
         
         validPaths = new HashMap<BoardTile, CreaturePath>();
     }
@@ -179,13 +190,17 @@ public class GameCourt extends JPanel {
         
         board.readMap();
         players = new Player[board.startTiles.size()];
+        Color colors[] = {Color.BLUE, Color.CYAN, Color.GREEN, Color.RED, Color.YELLOW, Color.ORANGE, Color.PINK, Color.MAGENTA};
         for (int i = 0; i < board.startTiles.size(); i++) {
         	BoardTile start = board.startTiles.get(i);
-        	players[i] = new Player(start.spaceX, start.spaceY, this);
+        	Color nextColor = colors[Math.min(i, colors.length)];
+        	players[i] = new Player(start.spaceX, start.spaceY, this, nextColor);
         	System.out.println("New player");
         }
         
         traitDisplays = new CardDisplay[3];
+        
+        nextEvent = eventDeck.randomEvent();
 
         playing = true;
         start = true;
@@ -239,11 +254,21 @@ public class GameCourt extends JPanel {
             	}
             }
             
+            if (eventDisplay != null) eventDisplay.update();
+            if (combatDisplay != null) combatDisplay.update();
+            
             frame++;
 
             // update the display
             repaint();
         }
+    }
+    
+    private void endTurnCycle() {
+    	eventDisplay = new EventDisplay(nextEvent, this);
+    	nextEvent.doEffect();
+    	nextEvent = eventDeck.randomEvent();
+    	board.endCycle();
     }
     
     public void animateCreatureMovement(Creature creature, CreaturePath path) {
@@ -282,6 +307,31 @@ public class GameCourt extends JPanel {
     	displayingCreature = null;
     }
     
+    public void endEventDisplay() {
+    	eventDisplay = null;
+    }
+    
+    public void fight(Creature attacker, Creature defender, BoardTile tile) {
+    	Creature winningCreature;
+    	Creature losingCreature;
+    	if (attacker.getCombat() > defender.getCombat()) {
+    		winningCreature = attacker;
+    		losingCreature = defender;
+    	}
+    	else {
+    		winningCreature = defender;
+    		losingCreature = attacker;
+    	}
+    	
+    	tile.creatureOnTile = winningCreature;
+    	losingCreature.die(winningCreature);
+    	combatDisplay = new CombatDisplay(winningCreature, losingCreature, this);
+    }
+    
+    public void stopFight() {
+    	combatDisplay = null;
+    }
+    
     public void displayEvolving(Creature c, Trait t, int whichTrait, boolean userPick) {
     	displayingEvolving = true;
     	evolveAnimTick = 0;
@@ -303,7 +353,10 @@ public class GameCourt extends JPanel {
     
     public void incrementTurn() {
     	whosTurn++;
-    	if (whosTurn > players.length) whosTurn = 1;
+    	if (whosTurn > players.length) {
+    		whosTurn = 1;
+    		endTurnCycle();
+    	}
     	validPaths = players[whosTurn - 1].getPotentialPaths();
     }
     
@@ -357,6 +410,9 @@ public class GameCourt extends JPanel {
                 if (traitDisplays[i] != null) traitDisplays[i].draw(g);
             }
             if (traitToAddDisplay != null) traitToAddDisplay.draw(g);
+            
+            if (eventDisplay != null) eventDisplay.draw(g);
+            if (combatDisplay != null) combatDisplay.draw(g);
         }
     }
     

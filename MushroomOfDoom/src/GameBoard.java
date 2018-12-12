@@ -22,6 +22,18 @@ public class GameBoard {
     	
     	startTiles = new ArrayList<BoardTile>();
     }
+
+	public void endCycle() {
+		for (int i = 0; i < board.length; i++) {
+			for (int j = 0; j < board[0].length; j++) {
+				BoardTile tile = board[i][j];
+				if (tile.type == BoardTile.EnumTileType.NEST_INACTIVE && tile.turnsUntilNestActive > 0) {
+					tile.turnsUntilNestActive--;
+					if (tile.turnsUntilNestActive <= 0) tile.type = BoardTile.EnumTileType.NEST;
+				}
+			}
+		}
+	}
     
     public void readMap() {
         BufferedImage img;
